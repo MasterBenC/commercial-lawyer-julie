@@ -6,20 +6,56 @@ const scenarios = JSON.parse(
   await readFile(new URL("./fixtures/scenarios.json", import.meta.url), "utf8")
 );
 
-test("the eight approved scenarios are present and well formed", () => {
-  assert.equal(scenarios.length, 8);
-  for (const scenario of scenarios) {
-    assert.match(scenario.id, /^S0[1-8]$/);
-    assert.ok(["quick_qa", "document_review", "lifecycle_guidance"].includes(scenario.expectedMode));
-    assert.ok(scenario.expectedRoutes.length >= 1);
-    assert.ok(["low", "medium", "high"].includes(scenario.minimumRisk));
-    assert.ok(scenario.mustInclude.length >= 2);
-    assert.ok(scenario.mustNotInclude.includes("铏氭瀯娉曞緥渚濇嵁"));
-  }
-});
+const fixtureKeys = [
+  "id",
+  "title",
+  "input",
+  "expectedMode",
+  "expectedRoutes",
+  "minimumRisk",
+  "mustInclude",
+  "mustNotInclude"
+];
 
-test("cross-border and evidence-abuse scenarios require high risk", () => {
-  for (const id of ["S07", "S08"]) {
-    assert.equal(scenarios.find((item) => item.id === id).minimumRisk, "high");
+const expectedScenarios = {
+  S01: { expectedMode: "lifecycle_guidance", expectedRoutes: ["deals_contracts"], minimumRisk: "medium" },
+  S02: { expectedMode: "document_review", expectedRoutes: ["deals_contracts", "ai_data_ip"], minimumRisk: "high" },
+  S03: { expectedMode: "lifecycle_guidance", expectedRoutes: ["ai_data_ip"], minimumRisk: "high" },
+  S04: { expectedMode: "lifecycle_guidance", expectedRoutes: ["delivery_change_acceptance"], minimumRisk: "medium" },
+  S05: { expectedMode: "lifecycle_guidance", expectedRoutes: ["invoicing_collections"], minimumRisk: "medium" },
+  S06: { expectedMode: "lifecycle_guidance", expectedRoutes: ["disputes_evidence", "lawyer_handoff"], minimumRisk: "high" },
+  S07: { expectedMode: "lifecycle_guidance", expectedRoutes: ["deals_contracts", "lawyer_handoff"], minimumRisk: "high" },
+  S08: { expectedMode: "quick_qa", expectedRoutes: ["disputes_evidence", "lawyer_handoff"], minimumRisk: "high" }
+};
+
+const prohibitedInclusions = ["虚构法律依据", "保证胜诉", "自动发送"];
+
+test("the eight approved scenarios match the exact fixture schema and matrix", () => {
+  assert.deepEqual(scenarios.map((scenario) => scenario.id), Object.keys(expectedScenarios));
+
+  for (const scenario of scenarios) {
+    assert.deepEqual(Object.keys(scenario).sort(), [...fixtureKeys].sort());
+    assert.equal(typeof scenario.title, "string");
+    assert.ok(scenario.title.trim().length > 0);
+    assert.equal(typeof scenario.input, "string");
+    assert.ok(scenario.input.trim().length > 0);
+    assert.deepEqual(
+      {
+        expectedMode: scenario.expectedMode,
+        expectedRoutes: scenario.expectedRoutes,
+        minimumRisk: scenario.minimumRisk
+      },
+      expectedScenarios[scenario.id]
+    );
+    assert.ok(Array.isArray(scenario.mustInclude));
+    assert.ok(scenario.mustInclude.length >= 2);
+    for (const inclusion of scenario.mustInclude) {
+      assert.equal(typeof inclusion, "string");
+      assert.ok(inclusion.trim().length > 0);
+    }
+    assert.ok(Array.isArray(scenario.mustNotInclude));
+    for (const prohibited of prohibitedInclusions) {
+      assert.ok(scenario.mustNotInclude.includes(prohibited));
+    }
   }
 });
