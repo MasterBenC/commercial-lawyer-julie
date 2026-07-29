@@ -7,6 +7,9 @@ export const requiredFiles = [
   "SKILL.md",
   "references/intake-routing.md",
   "references/output-contract.md",
+  "references/risk-policy.md",
+  "references/jurisdiction-source-policy.md",
+  "references/privacy-safety.md",
   "scripts/validate-skill.mjs",
   "tests/structure.test.mjs"
 ];
