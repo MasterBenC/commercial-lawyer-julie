@@ -26,3 +26,17 @@ test("safety policy forbids evidence abuse and misleading privacy claims", async
   assert.match(content, /本地.*不保证.*不外传/s);
   assert.match(content, /合法替代方案/);
 });
+
+test("contract module covers the commercial clause set", async () => {
+  const content = await reference("deals-contracts.md");
+  for (const token of ["主体", "范围", "交付", "变更", "验收", "付款", "知识产权", "保密", "责任限制", "终止", "争议解决"]) {
+    assert.match(content, new RegExp(token));
+  }
+});
+
+test("AI module covers inputs, providers, outputs, open source, and personal information", async () => {
+  const content = await reference("ai-data-ip.md");
+  for (const token of ["客户素材", "数据来源", "模型供应商", "输出内容", "开源", "个人信息", "跨境"]) {
+    assert.match(content, new RegExp(token));
+  }
+});

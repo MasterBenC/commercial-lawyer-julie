@@ -10,6 +10,11 @@ export const requiredFiles = [
   "references/risk-policy.md",
   "references/jurisdiction-source-policy.md",
   "references/privacy-safety.md",
+  "references/deals-contracts.md",
+  "references/ai-data-ip.md",
+  "templates/quotation-confirmation.md",
+  "templates/nda.md",
+  "templates/service-agreement.md",
   "scripts/validate-skill.mjs",
   "tests/structure.test.mjs"
 ];
