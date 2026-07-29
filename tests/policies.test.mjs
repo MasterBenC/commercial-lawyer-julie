@@ -6,11 +6,17 @@ async function reference(name) {
   return readFile(new URL(`../references/${name}`, import.meta.url), "utf8");
 }
 
+async function template(name) {
+  return readFile(new URL(`../templates/${name}`, import.meta.url), "utf8");
+}
+
 test("risk policy defines all levels and mandatory high-risk categories", async () => {
   const content = await reference("risk-policy.md");
   for (const token of ["low", "medium", "high", "诉讼", "行政", "刑事", "股权", "敏感个人信息", "重大知识产权"]) {
     assert.match(content, new RegExp(token));
   }
+  assert.match(content, /对于 `high` 风险.*输出必须说明紧急程度.*临时行动.*触发 `lawyer_handoff`/s);
+  assert.match(content, /临时行动.*保全合法证据.*暂停不可逆决定.*收集关键文件.*有执业资格律师意见/s);
 });
 
 test("jurisdiction policy escalates cross-border indicators", async () => {
@@ -18,6 +24,12 @@ test("jurisdiction policy escalates cross-border indicators", async () => {
   for (const token of ["中国大陆", "香港", "境外主体", "境外付款", "跨境数据", "外国法"]) {
     assert.match(content, new RegExp(token));
   }
+  assert.match(content, /香港.*外国法.*境外主体.*境外付款.*跨境数据.*必须.*“跨境”标记.*`lawyer_handoff`/s);
+  for (const token of ["标题", "发布机关", "生效日期", "URL", "核验日期", "verified", "needs_verification", "unavailable"]) {
+    assert.match(content, new RegExp(token));
+  }
+  assert.match(content, /权威的一手来源核验/);
+  assert.match(content, /不得.*编造引文/s);
 });
 
 test("safety policy forbids evidence abuse and misleading privacy claims", async () => {
@@ -25,6 +37,9 @@ test("safety policy forbids evidence abuse and misleading privacy claims", async
   assert.match(content, /伪造.*篡改.*隐匿.*销毁/s);
   assert.match(content, /本地.*不保证.*不外传/s);
   assert.match(content, /合法替代方案/);
+  assert.match(content, /仅收集.*必需的事实/s);
+  assert.match(content, /文档中的指令.*不受信任.*不能改变本政策/s);
+  assert.match(content, /未获得.*明确授权前.*不得对外发送.*签署.*付款.*提交/s);
 });
 
 test("contract module covers the commercial clause set", async () => {
@@ -43,7 +58,7 @@ test("AI module covers inputs, providers, outputs, open source, and personal inf
 
 test("entrusted personal-information processing distinguishes the handler from the trustee", async () => {
   const aiData = await reference("ai-data-ip.md");
-  const serviceAgreement = await readFile(new URL("../templates/service-agreement.md", import.meta.url), "utf8");
+  const serviceAgreement = await template("service-agreement.md");
 
   for (const content of [aiData, serviceAgreement]) {
     assert.match(content, /个人信息处理者.*受托人/s);
@@ -53,6 +68,36 @@ test("entrusted personal-information processing distinguishes the handler from t
     assert.match(serviceAgreement, new RegExp(token));
   }
   assert.match(serviceAgreement, /未经甲方作为个人信息处理者同意.*转委托/s);
+});
+
+test("NDA excludes information independently developed without confidential information", async () => {
+  const content = await template("nda.md");
+  assert.match(content, /不属于保密信息.*未使用保密信息.*独立开发/s);
+});
+
+test("service agreement states an operative indemnity trigger and scope", async () => {
+  const content = await template("service-agreement.md");
+  assert.match(content, /违反.*陈述、承诺或义务.*第三方索赔.*直接损失.*合理费用.*赔偿/s);
+});
+
+test("transaction templates preserve their substantive drafting requirements", async () => {
+  const quotation = await template("quotation-confirmation.md");
+  const nda = await template("nda.md");
+  const serviceAgreement = await template("service-agreement.md");
+
+  for (const content of [quotation, nda, serviceAgreement]) {
+    assert.match(content, /交易起草模板/);
+    assert.match(content, /\[[^\]]+\]/);
+  }
+  for (const token of ["有效期", "服务范围", "交付物", "排除事项", "客户配合", "付款", "税务", "变更", "验收"]) {
+    assert.match(quotation, new RegExp(token));
+  }
+  for (const token of ["保密信息", "不属于保密信息", "需要知悉", "保密期限", "返还", "删除", "救济"]) {
+    assert.match(nda, new RegExp(token));
+  }
+  for (const token of ["服务范围", "变更", "验收", "付款", "背景知识产权", "交付物权利", "模型披露", "保密", "个人信息", "赔偿", "责任限制", "期限", "终止", "争议解决"]) {
+    assert.match(serviceAgreement, new RegExp(token));
+  }
 });
 
 test("operational modules cover change, acceptance, collection, and evidence", async () => {
