@@ -4,6 +4,9 @@ import path from "node:path";
 
 export const requiredFiles = [
   "package.json",
+  "SKILL.md",
+  "references/intake-routing.md",
+  "references/output-contract.md",
   "scripts/validate-skill.mjs",
   "tests/structure.test.mjs"
 ];
