@@ -27,5 +27,5 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     console.error(`Missing required files:\n${result.missing.join("\n")}`);
     process.exit(1);
   }
-  console.log("Commercial Lawyer Julie package is structurally valid.");
+  console.log("商业律师 Julie package is structurally valid.");
 }

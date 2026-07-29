@@ -157,7 +157,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     console.error(`Missing required files:\n${result.missing.join("\n")}`);
     process.exit(1);
   }
-  console.log("Commercial Lawyer Julie package is structurally valid.");
+  console.log("商业律师 Julie package is structurally valid.");
 }
 ```
 
@@ -801,7 +801,7 @@ Add `README.md` and `LICENSE` to `requiredFiles`.
 
 Run: `npm test && npm run validate`
 
-Expected: All tests PASS and validation reports `Commercial Lawyer Julie package is structurally valid.`
+Expected: All tests PASS and validation reports `商业律师 Julie package is structurally valid.`
 
 - [ ] **Step 6: Commit documentation**
 
