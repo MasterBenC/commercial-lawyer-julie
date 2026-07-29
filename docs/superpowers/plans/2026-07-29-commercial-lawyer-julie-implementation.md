@@ -133,29 +133,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 
 export const requiredFiles = [
-  "SKILL.md",
-  "README.md",
-  "LICENSE",
-  "references/intake-routing.md",
-  "references/risk-policy.md",
-  "references/jurisdiction-source-policy.md",
-  "references/output-contract.md",
-  "references/privacy-safety.md",
-  "references/deals-contracts.md",
-  "references/ai-data-ip.md",
-  "references/delivery-change-acceptance.md",
-  "references/invoicing-collections.md",
-  "references/disputes-evidence.md",
-  "references/lawyer-handoff.md",
-  "templates/quotation-confirmation.md",
-  "templates/nda.md",
-  "templates/service-agreement.md",
-  "templates/change-order.md",
-  "templates/acceptance-record.md",
-  "templates/payment-reminder.md",
-  "templates/lawyer-handoff-pack.md",
-  "tests/fixtures/scenarios.json",
-  "docs/evaluation.md"
+  "package.json",
+  "scripts/validate-skill.mjs",
+  "tests/structure.test.mjs"
 ];
 
 export async function validateSkill(rootUrl) {
@@ -181,11 +161,11 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
 }
 ```
 
-- [ ] **Step 5: Run the test and confirm it now fails for the real missing package files**
+- [ ] **Step 5: Run the test and confirm the validation foundation passes**
 
 Run: `npm test`
 
-Expected: FAIL with an array beginning with `SKILL.md`.
+Expected: PASS.
 
 - [ ] **Step 6: Commit the validation foundation**
 
@@ -202,6 +182,7 @@ git commit -m "test: add Julie package validation"
 - Create: `SKILL.md`
 - Create: `references/intake-routing.md`
 - Create: `references/output-contract.md`
+- Modify: `scripts/validate-skill.mjs`
 - Modify: `tests/structure.test.mjs`
 
 **Interfaces:**
@@ -325,12 +306,22 @@ State material assumptions. Separate verified law from commercial judgment. For 
 
 Run: `node --test tests/structure.test.mjs`
 
-Expected: The two new tests PASS; the completeness test still reports later files as missing.
+Expected: All tests PASS.
 
-- [ ] **Step 7: Commit the main router**
+- [ ] **Step 7: Extend the required-file list**
+
+Add `SKILL.md`, `references/intake-routing.md`, and `references/output-contract.md` to `requiredFiles`.
+
+- [ ] **Step 8: Run the complete current suite**
+
+Run: `npm test && npm run validate`
+
+Expected: All tests PASS.
+
+- [ ] **Step 9: Commit the main router**
 
 ```bash
-git add SKILL.md references/intake-routing.md references/output-contract.md tests/structure.test.mjs
+git add SKILL.md references/intake-routing.md references/output-contract.md scripts/validate-skill.mjs tests/structure.test.mjs
 git commit -m "feat: add Julie intake and routing skill"
 ```
 
@@ -343,6 +334,7 @@ git commit -m "feat: add Julie intake and routing skill"
 - Create: `references/jurisdiction-source-policy.md`
 - Create: `references/privacy-safety.md`
 - Create: `tests/policies.test.mjs`
+- Modify: `scripts/validate-skill.mjs`
 
 **Interfaces:**
 - Produces: risk labels `low`, `medium`, `high`.
@@ -421,16 +413,18 @@ Require:
 - Refuse fabrication, alteration, concealment, or destruction of evidence and give a lawful alternative.
 - Do not send, sign, pay, or file externally without a separate future capability and explicit authorization.
 
-- [ ] **Step 6: Run the policy tests**
+- [ ] **Step 6: Extend validation and run the policy tests**
 
-Run: `node --test tests/policies.test.mjs`
+Add the three policy references to `requiredFiles`.
+
+Run: `npm test && npm run validate`
 
 Expected: PASS.
 
 - [ ] **Step 7: Commit the policy layer**
 
 ```bash
-git add references/risk-policy.md references/jurisdiction-source-policy.md references/privacy-safety.md tests/policies.test.mjs
+git add references/risk-policy.md references/jurisdiction-source-policy.md references/privacy-safety.md scripts/validate-skill.mjs tests/policies.test.mjs
 git commit -m "feat: define Julie legal risk and safety policies"
 ```
 
@@ -444,6 +438,7 @@ git commit -m "feat: define Julie legal risk and safety policies"
 - Create: `templates/quotation-confirmation.md`
 - Create: `templates/nda.md`
 - Create: `templates/service-agreement.md`
+- Modify: `scripts/validate-skill.mjs`
 - Modify: `tests/policies.test.mjs`
 
 **Interfaces:**
@@ -511,16 +506,18 @@ Each template must:
 
 The service agreement must include scope, change, acceptance, payment, background IP, deliverable rights, AI/model disclosure, confidentiality, data, liability cap, term, termination, and dispute sections.
 
-- [ ] **Step 6: Run policy tests**
+- [ ] **Step 6: Extend validation and run policy tests**
 
-Run: `node --test tests/policies.test.mjs`
+Add both module references and all three transaction templates to `requiredFiles`.
+
+Run: `npm test && npm run validate`
 
 Expected: PASS.
 
 - [ ] **Step 7: Commit transaction and AI modules**
 
 ```bash
-git add references/deals-contracts.md references/ai-data-ip.md templates/quotation-confirmation.md templates/nda.md templates/service-agreement.md tests/policies.test.mjs
+git add references/deals-contracts.md references/ai-data-ip.md templates/quotation-confirmation.md templates/nda.md templates/service-agreement.md scripts/validate-skill.mjs tests/policies.test.mjs
 git commit -m "feat: add contracts and AI compliance guidance"
 ```
 
@@ -537,6 +534,7 @@ git commit -m "feat: add contracts and AI compliance guidance"
 - Create: `templates/acceptance-record.md`
 - Create: `templates/payment-reminder.md`
 - Create: `templates/lawyer-handoff-pack.md`
+- Modify: `scripts/validate-skill.mjs`
 - Modify: `tests/policies.test.mjs`
 
 **Interfaces:**
@@ -592,16 +590,18 @@ Required fields:
 - Payment reminder: contract, invoice, amount, due date, prior communication, requested payment date, reservation of rights.
 - Lawyer handoff pack: all ten structured sections plus file index.
 
-- [ ] **Step 5: Run policy tests**
+- [ ] **Step 5: Extend validation and run policy tests**
 
-Run: `node --test tests/policies.test.mjs`
+Add all four operational references and four templates to `requiredFiles`.
+
+Run: `npm test && npm run validate`
 
 Expected: PASS.
 
 - [ ] **Step 6: Commit operational modules**
 
 ```bash
-git add references/delivery-change-acceptance.md references/invoicing-collections.md references/disputes-evidence.md references/lawyer-handoff.md templates/change-order.md templates/acceptance-record.md templates/payment-reminder.md templates/lawyer-handoff-pack.md tests/policies.test.mjs
+git add references/delivery-change-acceptance.md references/invoicing-collections.md references/disputes-evidence.md references/lawyer-handoff.md templates/change-order.md templates/acceptance-record.md templates/payment-reminder.md templates/lawyer-handoff-pack.md scripts/validate-skill.mjs tests/policies.test.mjs
 git commit -m "feat: add delivery collection and handoff workflows"
 ```
 
@@ -615,6 +615,7 @@ git commit -m "feat: add delivery collection and handoff workflows"
 - Create: `scripts/render-scenario-prompts.mjs`
 - Create: `docs/evaluation.md`
 - Modify: `package.json`
+- Modify: `scripts/validate-skill.mjs`
 
 **Interfaces:**
 - Produces: fixture schema `{ id, title, input, expectedMode, expectedRoutes, minimumRisk, mustInclude, mustNotInclude }`.
@@ -716,16 +717,18 @@ Add to `package.json` scripts:
 5. Fail a scenario for fabricated law, incorrect downgrade, multiple-question intake, evidence abuse, missing cross-border flag, or unauthorized external action.
 6. Store dated evaluation results outside the distributable Skill or under a dedicated `evaluations/` directory.
 
-- [ ] **Step 7: Run scenario tests and render prompts**
+- [ ] **Step 7: Extend validation, run scenario tests, and render prompts**
 
-Run: `npm test && npm run eval:render`
+Add `tests/fixtures/scenarios.json` and `docs/evaluation.md` to `requiredFiles`.
+
+Run: `npm test && npm run validate && npm run eval:render`
 
 Expected: All tests PASS and `work/evaluation-prompts.md` is created.
 
 - [ ] **Step 8: Commit evaluation assets**
 
 ```bash
-git add package.json tests/fixtures/scenarios.json tests/scenarios.test.mjs scripts/render-scenario-prompts.mjs docs/evaluation.md
+git add package.json scripts/validate-skill.mjs tests/fixtures/scenarios.json tests/scenarios.test.mjs scripts/render-scenario-prompts.mjs docs/evaluation.md
 git commit -m "test: add Julie scenario evaluation suite"
 ```
 
@@ -737,6 +740,7 @@ git commit -m "test: add Julie scenario evaluation suite"
 - Create: `README.md`
 - Create: `LICENSE`
 - Create: `.gitignore`
+- Modify: `scripts/validate-skill.mjs`
 - Modify: `tests/structure.test.mjs`
 
 **Interfaces:**
@@ -791,7 +795,9 @@ work/
 Thumbs.db
 ```
 
-- [ ] **Step 5: Run the complete suite**
+- [ ] **Step 5: Complete the required-file list and run the suite**
+
+Add `README.md` and `LICENSE` to `requiredFiles`.
 
 Run: `npm test && npm run validate`
 
@@ -800,7 +806,7 @@ Expected: All tests PASS and validation reports `Commercial Lawyer Julie package
 - [ ] **Step 6: Commit documentation**
 
 ```bash
-git add README.md LICENSE .gitignore tests/structure.test.mjs
+git add README.md LICENSE .gitignore scripts/validate-skill.mjs tests/structure.test.mjs
 git commit -m "docs: add Julie installation and safety guide"
 ```
 
