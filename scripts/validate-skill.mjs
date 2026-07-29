@@ -3,6 +3,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 
 export const requiredFiles = [
+  ".gitignore",
   "package.json",
   "SKILL.md",
   "README.md",
@@ -26,8 +27,13 @@ export const requiredFiles = [
   "templates/payment-reminder.md",
   "templates/lawyer-handoff-pack.md",
   "scripts/validate-skill.mjs",
+  "scripts/prepare-blind-runtime.mjs",
+  "scripts/render-scenario-prompts.mjs",
   "tests/structure.test.mjs",
-  "tests/fixtures/scenarios.json",
+  "tests/policies.test.mjs",
+  "tests/scenarios.test.mjs",
+  "tests/fixtures/scenario-inputs.json",
+  "tests/fixtures/scenario-rubrics.json",
   "docs/evaluation.md"
 ];
 

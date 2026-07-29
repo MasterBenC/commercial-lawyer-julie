@@ -1,6 +1,8 @@
 # 律师交接
 
-当风险标签为 `high`，或存在 `litigation_or_arbitration`、`administrative_investigation`、`possible_criminal_exposure`、`equity_dispute`、`major_business_transaction`、`sensitive_personal_information`、`major_ip_ownership_dispute`、`complex_cross_border_matter` 任一升级原因时，触发 `lawyer_handoff`。在律师评估前，仅进行合法的材料保全、事实整理和紧急风险提示；不得伪造、篡改、隐匿或销毁证据。
+当风险标签为 `high`，存在 `litigation_or_arbitration`、`administrative_investigation`、`possible_criminal_exposure`、`equity_dispute`、`major_business_transaction`、`sensitive_personal_information`、`major_ip_ownership_dispute`、`complex_cross_border_matter` 任一升级原因，或用户明确要求整理律师交接材料时，触发 `lawyer_handoff`。在律师评估前，仅进行合法的材料保全、事实整理和紧急风险提示；不得伪造、篡改、隐匿或销毁证据。
+
+触发升级或用户明确要求律师交接，且需要形成可交付的结构化材料时，读取 `templates/lawyer-handoff-pack.md`；仅作高风险提示而尚无交接材料时不加载。模板生成后仍须由用户核对事实并决定是否交给持证律师。
 
 交接包必须且只能包含以下十个结构化部分。缺失信息写明“待核实”，不可用推测补足。
 

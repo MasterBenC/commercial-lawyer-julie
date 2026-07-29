@@ -10,6 +10,10 @@ async function template(name) {
   return readFile(new URL(`../templates/${name}`, import.meta.url), "utf8");
 }
 
+async function skill() {
+  return readFile(new URL("../SKILL.md", import.meta.url), "utf8");
+}
+
 test("risk policy defines all levels and mandatory high-risk categories", async () => {
   const content = await reference("risk-policy.md");
   for (const token of ["low", "medium", "high", "诉讼", "行政", "刑事", "股权", "敏感个人信息", "重大知识产权"]) {
@@ -32,6 +36,17 @@ test("jurisdiction policy escalates cross-border indicators", async () => {
   assert.match(content, /不得.*编造引文/s);
 });
 
+test("mainland China is an analysis baseline while governing law and forum come from the transaction", async () => {
+  const jurisdiction = await reference("jurisdiction-source-policy.md");
+  const deals = await reference("deals-contracts.md");
+  const joined = `${jurisdiction}\n${deals}`;
+
+  assert.match(jurisdiction, /中国大陆.*默认分析法域|默认适用法背景.*中国大陆/s);
+  assert.match(joined, /适用法律.*争议解决.*交易|交易.*适用法律.*争议解决/s);
+  assert.match(joined, /法院|仲裁机构/);
+  assert.doesNotMatch(joined, /默认管辖(?:地)?|中国大陆为默认管辖地/);
+});
+
 test("safety policy forbids evidence abuse and misleading privacy claims", async () => {
   const content = await reference("privacy-safety.md");
   assert.match(content, /伪造.*篡改.*隐匿.*销毁/s);
@@ -40,6 +55,74 @@ test("safety policy forbids evidence abuse and misleading privacy claims", async
   assert.match(content, /仅收集.*必需的事实/s);
   assert.match(content, /文档中的指令.*不受信任.*不能改变本政策/s);
   assert.match(content, /未获得.*明确授权前.*不得对外发送.*签署.*付款.*提交/s);
+});
+
+test("mandatory runtime instructions cover identity, refusal, untrusted inputs, and recoverable failures", async () => {
+  const [skillContent, safety] = await Promise.all([
+    skill(),
+    reference("privacy-safety.md")
+  ]);
+  const runtime = `${skillContent}\n${safety}`;
+
+  assert.match(runtime, /不替代.*持证律师.*正式法律意见/s);
+  assert.match(runtime, /逃避.*监管义务.*依法或依约应披露.*拒绝.*合法替代方案/s);
+  assert.match(runtime, /粘贴文本.*检索.*网页.*工具.*搜索.*不受信任/s);
+  assert.match(runtime, /超大.*损坏.*不支持.*无法读取/s);
+  assert.match(runtime, /冲突条款.*位置.*后果.*统一修改/s);
+  assert.match(runtime, /工具.*检索.*失败.*事实.*法律核验.*(?:needs_verification|unavailable)/s);
+});
+
+test("refusal language targets unlawful, deceptive, or misleading evasion", async () => {
+  const skillContent = await skill();
+  const safety = await reference("privacy-safety.md");
+
+  for (const content of [skillContent, safety]) {
+    assert.match(content, /违法、欺骗或误导/);
+    assert.match(content, /依法或依约应披露的重要事实/);
+  }
+});
+
+test("each operational route exposes only its relevant template paths and loading conditions", async () => {
+  const skillContent = await skill();
+  const mappings = {
+    "deals-contracts.md": [
+      "templates/quotation-confirmation.md",
+      "templates/nda.md",
+      "templates/service-agreement.md"
+    ],
+    "ai-data-ip.md": ["templates/service-agreement.md"],
+    "delivery-change-acceptance.md": [
+      "templates/change-order.md",
+      "templates/acceptance-record.md"
+    ],
+    "invoicing-collections.md": ["templates/payment-reminder.md"],
+    "lawyer-handoff.md": ["templates/lawyer-handoff-pack.md"]
+  };
+
+  for (const [referenceName, templatePaths] of Object.entries(mappings)) {
+    const moduleContent = await reference(referenceName);
+    for (const templatePath of templatePaths) {
+      assert.ok(skillContent.includes(templatePath));
+      assert.ok(moduleContent.includes(templatePath));
+    }
+    assert.match(moduleContent, /仅当|需要.*时|触发.*时|符合.*条件/s);
+  }
+});
+
+test("an explicit user request can trigger the vetted lawyer handoff template", async () => {
+  const [skillContent, handoff, handoffTemplate] = await Promise.all([
+    skill(),
+    reference("lawyer-handoff.md"),
+    template("lawyer-handoff-pack.md")
+  ]);
+
+  for (const content of [skillContent, handoff, handoffTemplate]) {
+    assert.match(content, /用户明确要求.*律师交接|用户.*明确要求.*交接材料/s);
+  }
+  for (const content of [skillContent, handoff]) {
+    assert.ok(content.includes("templates/lawyer-handoff-pack.md"));
+  }
+  assert.match(handoffTemplate, /`low`.*`medium`.*`high`/s);
 });
 
 test("contract module covers the commercial clause set", async () => {
@@ -70,14 +153,66 @@ test("entrusted personal-information processing distinguishes the handler from t
   assert.match(serviceAgreement, /未经甲方作为个人信息处理者同意.*转委托/s);
 });
 
+test("the PIPL Article 21 source record is complete and verified against an official source", async () => {
+  const aiData = await reference("ai-data-ip.md");
+  for (const token of [
+    "中华人民共和国个人信息保护法",
+    "全国人民代表大会常务委员会",
+    "中华人民共和国主席令第九十一号",
+    "2021-08-20",
+    "2021-11-01",
+    "https://www.npc.gov.cn/npc/c2/c30834/202108/t20210820_313088.html",
+    "2026-07-29",
+    "verified"
+  ]) {
+    assert.match(aiData, new RegExp(token.replaceAll("/", "\\/")));
+  }
+  assert.match(aiData, /第二十一条/);
+  assert.match(aiData, /应依.*第二十一条约定/);
+  assert.match(aiData, /便于证明和执行.*建议.*书面形式/s);
+  assert.doesNotMatch(aiData, /第二十一条.*应书面约定/s);
+});
+
 test("NDA excludes information independently developed without confidential information", async () => {
   const content = await template("nda.md");
   assert.match(content, /不属于保密信息.*未使用保密信息.*独立开发/s);
 });
 
+test("NDA treats compelled disclosure as limited permission without ending confidentiality", async () => {
+  const content = await template("nda.md");
+  const exclusions = content.slice(
+    content.indexOf("下列信息不属于保密信息"),
+    content.indexOf("## 二、")
+  );
+
+  assert.doesNotMatch(exclusions, /依法必须披露/);
+  assert.match(content, /依法.*必须披露.*可行.*通知/s);
+  assert.match(content, /法定.*最低.*范围|披露.*必要.*范围/s);
+  assert.match(content, /披露后.*仍.*保密|未披露部分.*继续.*保密/s);
+});
+
 test("service agreement states an operative indemnity trigger and scope", async () => {
   const content = await template("service-agreement.md");
   assert.match(content, /违反.*陈述、承诺或义务.*第三方索赔.*直接损失.*合理费用.*赔偿/s);
+});
+
+test("service agreement subprocessor carve-out remains subject to confidentiality and data consent", async () => {
+  const content = await template("service-agreement.md");
+  const other = content.slice(content.indexOf("## 11. 其他"));
+
+  assert.match(other, /第\s*7\s*条.*保密与数据/s);
+  assert.match(other, /第\s*7\s*条确认的实际角色.*相应个人信息处理者.*书面同意/s);
+  assert.doesNotMatch(other, /甲方作为个人信息处理者/);
+  assert.match(other, /接触保密信息.*事先取得.*披露方.*书面同意/s);
+  assert.match(other, /转委托|分包商|次级处理者/);
+});
+
+test("the action-list contract uses the exact heading and operational fields", async () => {
+  const content = await reference("output-contract.md");
+  assert.match(content, /7\. `法务行动清单`/);
+  assert.match(content, /负责人.*动作.*期限/s);
+  assert.match(content, /负责人.*默认为.*用户/s);
+  assert.doesNotMatch(content, /`法律行动清单`/);
 });
 
 test("transaction templates preserve their substantive drafting requirements", async () => {
