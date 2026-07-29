@@ -54,3 +54,22 @@ test("entrusted personal-information processing distinguishes the handler from t
   }
   assert.match(serviceAgreement, /未经甲方作为个人信息处理者同意.*转委托/s);
 });
+
+test("operational modules cover change, acceptance, collection, and evidence", async () => {
+  const files = [
+    "delivery-change-acceptance.md",
+    "invoicing-collections.md",
+    "disputes-evidence.md"
+  ];
+  const joined = (await Promise.all(files.map(reference))).join("\n");
+  for (const token of ["变更单", "追加费用", "验收", "暂停服务", "催款", "时间线", "聊天记录", "版本记录"]) {
+    assert.match(joined, new RegExp(token));
+  }
+});
+
+test("handoff module defines every required handoff section", async () => {
+  const content = await reference("lawyer-handoff.md");
+  for (const token of ["事项摘要", "当事人", "事实时间线", "争议金额", "关键条款", "现有证据", "证据缺口", "核心问题", "待办时限", "咨询提纲"]) {
+    assert.match(content, new RegExp(token));
+  }
+});

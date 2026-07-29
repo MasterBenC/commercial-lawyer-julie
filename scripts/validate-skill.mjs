@@ -12,9 +12,17 @@ export const requiredFiles = [
   "references/privacy-safety.md",
   "references/deals-contracts.md",
   "references/ai-data-ip.md",
+  "references/delivery-change-acceptance.md",
+  "references/invoicing-collections.md",
+  "references/disputes-evidence.md",
+  "references/lawyer-handoff.md",
   "templates/quotation-confirmation.md",
   "templates/nda.md",
   "templates/service-agreement.md",
+  "templates/change-order.md",
+  "templates/acceptance-record.md",
+  "templates/payment-reminder.md",
+  "templates/lawyer-handoff-pack.md",
   "scripts/validate-skill.mjs",
   "tests/structure.test.mjs"
 ];
