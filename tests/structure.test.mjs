@@ -23,8 +23,9 @@ test("the validator reports the Chinese Julie display name on success", async ()
 test("SKILL.md declares the stable skill name and description", async () => {
   const content = await readFile(new URL("../SKILL.md", import.meta.url), "utf8");
   assert.match(content, /^---\nname: commercial-lawyer-julie\n/m);
-  assert.match(content, /鍟嗕笟寰嬪笀 Julie/);
-  assert.match(content, /AI 涓€浜哄叕鍙竱AI OPC/);
+  assert.match(content, /商业律师 Julie/);
+  assert.match(content, /AI 一人公司/);
+  assert.match(content, /AI OPC/);
 });
 
 test("SKILL.md routes all six operational modules", async () => {
