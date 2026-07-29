@@ -24,7 +24,9 @@ export const requiredFiles = [
   "templates/payment-reminder.md",
   "templates/lawyer-handoff-pack.md",
   "scripts/validate-skill.mjs",
-  "tests/structure.test.mjs"
+  "tests/structure.test.mjs",
+  "tests/fixtures/scenarios.json",
+  "docs/evaluation.md"
 ];
 
 export async function validateSkill(rootUrl) {
