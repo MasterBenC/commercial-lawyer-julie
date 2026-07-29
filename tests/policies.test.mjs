@@ -40,3 +40,17 @@ test("AI module covers inputs, providers, outputs, open source, and personal inf
     assert.match(content, new RegExp(token));
   }
 });
+
+test("entrusted personal-information processing distinguishes the handler from the trustee", async () => {
+  const aiData = await reference("ai-data-ip.md");
+  const serviceAgreement = await readFile(new URL("../templates/service-agreement.md", import.meta.url), "utf8");
+
+  for (const content of [aiData, serviceAgreement]) {
+    assert.match(content, /个人信息处理者.*受托人/s);
+    assert.match(content, /不得.*受托人.*个人信息处理者.*混同/s);
+  }
+  for (const token of ["委托处理目的", "期限", "处理方式", "个人信息的种类", "保护措施", "双方权利和义务", "监督", "返还", "删除"]) {
+    assert.match(serviceAgreement, new RegExp(token));
+  }
+  assert.match(serviceAgreement, /未经甲方作为个人信息处理者同意.*转委托/s);
+});
