@@ -41,3 +41,10 @@ test("SKILL.md routes all six operational modules", async () => {
     assert.match(content, new RegExp(`\\b${route}\\b`));
   }
 });
+
+test("README documents installation, safety boundary, tests, and LexFlow status", async () => {
+  const content = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  for (const token of ["商业律师 Julie", "安装", "npm test", "中国大陆", "不构成律师委托", "LexFlow", "路线图"]) {
+    assert.match(content, new RegExp(token));
+  }
+});

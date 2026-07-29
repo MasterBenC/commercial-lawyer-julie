@@ -5,6 +5,8 @@ import path from "node:path";
 export const requiredFiles = [
   "package.json",
   "SKILL.md",
+  "README.md",
+  "LICENSE",
   "references/intake-routing.md",
   "references/output-contract.md",
   "references/risk-policy.md",
