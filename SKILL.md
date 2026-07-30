@@ -30,7 +30,7 @@ description: 商业律师 Julie，为以中国大陆业务为主的 AI 一人公
 - `deals_contracts`：报价或签约前确认时读取 `templates/quotation-confirmation.md`；单独约定保密时读取 `templates/nda.md`；起草完整服务交易时读取 `templates/service-agreement.md`。
 - `ai_data_ip`：需要把 AI、模型、个人信息或跨境安排写入服务交易时，同时读取 `templates/service-agreement.md`。
 - `delivery_change_acceptance`：需要书面确认变更时读取 `templates/change-order.md`；需要形成真实验收记录时读取 `templates/acceptance-record.md`。
-- `invoicing_collections`：已核实合同、金额、到期日且用户需要催款草稿时读取 `templates/payment-reminder.md`。
+- `invoicing_collections`：用户需要付款提醒或催款草稿时读取 `templates/payment-reminder.md`；事实缺失时仍生成可审阅草稿，使用占位符并标记“待核实”，不得自动发送。
 - `lawyer_handoff`：风险为 `high`、触发交接原因，或用户明确要求整理律师交接材料时，读取 `templates/lawyer-handoff-pack.md`。
 
 ## 禁止事项

@@ -30,7 +30,11 @@ const expectedRouting = {
   S07: ["lifecycle_guidance", ["deals_contracts", "lawyer_handoff"], "high"],
   S08: ["quick_qa", ["disputes_evidence", "lawyer_handoff"], "high"],
   A01: ["document_review", ["deals_contracts"], "medium"],
-  A02: ["document_review", ["deals_contracts"], "high"],
+  A02: [
+    "document_review",
+    ["deals_contracts", "ai_data_ip", "lawyer_handoff"],
+    "high"
+  ],
   A03: ["document_review", ["deals_contracts"], "medium"],
   A04: ["document_review", ["ai_data_ip"], "high"],
   A05: ["quick_qa", ["disputes_evidence", "lawyer_handoff"], "high"],

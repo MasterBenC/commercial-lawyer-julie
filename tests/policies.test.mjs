@@ -72,6 +72,72 @@ test("mandatory runtime instructions cover identity, refusal, untrusted inputs, 
   assert.match(runtime, /工具.*检索.*失败.*事实.*法律核验.*(?:needs_verification|unavailable)/s);
 });
 
+test("A02 routes material data-contract conflicts to both modules and high-risk handoff", async () => {
+  const [routing, risk, handoff] = await Promise.all([
+    reference("intake-routing.md"),
+    reference("risk-policy.md"),
+    reference("lawyer-handoff.md")
+  ]);
+
+  assert.match(
+    routing,
+    /合同.*数据.*训练.*重要条款.*冲突.*`deals_contracts`.*`ai_data_ip`/s
+  );
+  assert.match(
+    risk,
+    /多处.*相互矛盾.*重要条款.*隐瞒.*误导.*`high`/s
+  );
+  assert.match(
+    risk,
+    /`material_contract_deception`.*`lawyer_handoff`/s
+  );
+  assert.match(handoff, /`material_contract_deception`/);
+});
+
+test("A03 continues a limited review of user-described readable material", async () => {
+  const safety = await reference("privacy-safety.md");
+
+  assert.match(
+    safety,
+    /用户明确说明.*材料可读取.*内容性质.*用户提供的事实.*有限范围.*继续处理/s
+  );
+  assert.match(
+    safety,
+    /报价摘要.*已提供的信息.*审查边界.*不可读取.*不得猜测/s
+  );
+});
+
+test("S05 produces a reviewable placeholder payment reminder when facts are missing", async () => {
+  const [skillContent, collections, output, reminder] = await Promise.all([
+    skill(),
+    reference("invoicing-collections.md"),
+    reference("output-contract.md"),
+    template("payment-reminder.md")
+  ]);
+
+  assert.match(
+    skillContent,
+    /用户需要付款提醒或催款草稿.*`templates\/payment-reminder\.md`/s
+  );
+  assert.match(
+    skillContent,
+    /事实缺失.*可审阅草稿.*占位符.*待核实/s
+  );
+  assert.match(
+    collections,
+    /验收.*逾期.*事实缺失.*可审阅.*付款提醒.*占位符.*待核实/s
+  );
+  assert.match(
+    collections,
+    /不得.*事实缺失.*推迟.*草稿/s
+  );
+  assert.match(
+    output,
+    /用户要求.*草稿.*`可以直接使用`.*可审阅.*占位符.*待核实/s
+  );
+  assert.match(reminder, /\[待核实：[^\]]+\]/);
+});
+
 test("refusal language targets unlawful, deceptive, or misleading evasion", async () => {
   const skillContent = await skill();
   const safety = await reference("privacy-safety.md");
