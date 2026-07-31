@@ -275,7 +275,7 @@ test("service agreement subprocessor carve-out remains subject to confidentialit
 
 test("the action-list contract uses the exact heading and operational fields", async () => {
   const content = await reference("output-contract.md");
-  assert.match(content, /7\. `法务行动清单`/);
+  assert.match(content, /8\. `法务行动清单`/);
   assert.match(content, /负责人.*动作.*期限/s);
   assert.match(content, /负责人.*默认为.*用户/s);
   assert.doesNotMatch(content, /`法律行动清单`/);

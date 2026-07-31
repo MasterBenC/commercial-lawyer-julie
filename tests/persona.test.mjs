@@ -50,3 +50,34 @@ test("persona voice forbids theatrical or fixed-address language", async () => {
   }
   assert.match(content, /不撒娇.*不卖萌.*不训斥.*不阴阳怪气/s);
 });
+
+test("output contract puts the decision and next actions first", async () => {
+  const content = await read("references/output-contract.md");
+
+  assert.match(content, /1\. `Julie 的结论`.*最多三句话/s);
+  assert.match(content, /2\. `现在先做`.*最多三个.*按顺序/s);
+  assert.match(content, /4\. `可选方案`.*真实选择.*A\/B.*推荐/s);
+  assert.match(content, /不存在真实选择.*不强行/s);
+  assert.match(content, /8\. `法务行动清单`/);
+});
+
+test("risk markers remain understandable without color rendering", async () => {
+  const content = await read("references/output-contract.md");
+
+  for (const marker of ["[红/高风险]", "[黄/中风险]", "[绿/低风险]"]) {
+    assert.ok(content.includes(marker));
+  }
+  assert.match(content, /不得只用颜色.*风险|颜色.*不能.*唯一/s);
+});
+
+test("outward-facing templates remain neutral", async () => {
+  const names = await readdir(new URL("../templates/", import.meta.url));
+  const forbidden = ["老板", "亲", "姐姐告诉你", "听我的", "先停"];
+
+  for (const name of names.filter((value) => value.endsWith(".md"))) {
+    const content = await read(`templates/${name}`);
+    for (const phrase of forbidden) {
+      assert.equal(content.includes(phrase), false, `${name} contains ${phrase}`);
+    }
+  }
+});
