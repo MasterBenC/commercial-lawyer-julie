@@ -18,7 +18,7 @@
 - Risk markers include both text and a visual cue: `[红/高风险]`, `[黄/中风险]`, and `[绿/低风险]`; color alone must never carry meaning.
 - Contracts, payment reminders, lawyer handoff packs, and every other file under `templates/` remain neutral and formal.
 - Persona wording must never change a legal conclusion, risk level, jurisdiction/source status, refusal rule, lawyer-handoff trigger, or external-action authorization boundary.
-- Add no runtime dependency and do not make LexFlow a runtime dependency.
+- Add no runtime dependency and do not make a project/document adapter a runtime dependency.
 - Use test-driven development: verify each new test fails for the intended missing contract, implement minimally, and end every task with the full `npm test` suite green.
 - This persona-only change does not trigger the complete 42-run isolated evaluation. It does require one controlled persona micro-test: five independent runs before implementation and five independent runs after implementation using the same prompt and scoring contract. Keep these micro-test artifacts in the git-ignored SDD workspace and do not describe them as complete release acceptance.
 - Preserve `v0.1.0-beta.1` metadata and existing evaluation reports; versioning, tagging, merging, and GitHub publication are separate integration decisions after implementation review.
@@ -389,7 +389,7 @@ git commit -m "feat: make Julie output decision-first"
 
 - [ ] **Step 1: Add a failing README persona-example test**
 
-In the existing `README documents installation, safety boundary, tests, and LexFlow status` test in `tests/structure.test.mjs`, add:
+In the existing `README documents installation, safety boundary, tests, and package boundary` test in `tests/structure.test.mjs`, add:
 
 ```js
 for (const token of [

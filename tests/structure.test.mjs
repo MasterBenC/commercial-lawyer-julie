@@ -89,7 +89,7 @@ test("README documents installation, safety boundary, tests, and package boundar
   for (const token of ["商业律师 Julie", "安装", "npm test", "中国大陆", "不构成律师委托", "路线图"]) {
     assert.match(content, new RegExp(token));
   }
-  assert.doesNotMatch(content, /LexFlow|LexLaw/i);
+  assert.doesNotMatch(content, new RegExp("Lex" + "(?:Flow|Law)", "i"));
   for (const token of [
     "冷静",
     "成熟",

@@ -4,7 +4,7 @@
 
 **Goal:** Build and publish “商业律师 Julie,” a modular Codex/Agent Skill that acts as a business-lifecycle legal adviser for AI one-person companies operating primarily under mainland Chinese law.
 
-**Architecture:** A small `SKILL.md` acts as the intake, risk-classification, and routing layer. Focused reference modules contain domain rules, templates contain reusable business documents, and a dependency-free Node.js validation suite checks structure, routing fixtures, required safety rules, and package integrity. LexFlow remains an optional future adapter rather than a runtime dependency.
+**Architecture:** A small `SKILL.md` acts as the intake, risk-classification, and routing layer. Focused reference modules contain domain rules, templates contain reusable business documents, and a dependency-free Node.js validation suite checks structure, routing fixtures, required safety rules, and package integrity. A project/document adapter remains an optional future integration rather than a runtime dependency.
 
 **Tech Stack:** Markdown Agent Skill, JSON fixtures, Node.js 20+ built-in test runner, Git, GitHub CLI.
 
@@ -21,8 +21,8 @@
 - Never claim that Julie establishes a lawyer-client relationship, replaces licensed counsel, or guarantees an outcome.
 - Refuse requests to fabricate, alter, conceal, or destroy evidence and offer a lawful alternative.
 - Do not automatically send messages, sign contracts, make payments, or submit litigation or regulatory materials.
-- The first release must work without LexFlow.
-- Use MIT licensing for the original Skill package; do not copy LexFlow source code or AGPL-covered implementation.
+- The first release must work without a project/document adapter.
+- Use MIT licensing for the original Skill package; do not copy external adapter source code or AGPL-covered implementation.
 
 ---
 
@@ -725,7 +725,7 @@ git commit -m "test: add Julie scenario evaluation suite"
 
 ---
 
-### Task 7: README, License, Installation, and LexFlow Boundary
+### Task 7: README, License, Installation, and Adapter Boundary
 
 **Files:**
 - Create: `README.md`
@@ -743,9 +743,9 @@ git commit -m "test: add Julie scenario evaluation suite"
 Append:
 
 ```js
-test("README documents installation, safety boundary, tests, and LexFlow status", async () => {
+test("README documents installation, safety boundary, tests, and package boundary", async () => {
   const content = await readFile(new URL("../README.md", import.meta.url), "utf8");
-  for (const token of ["商业律师 Julie", "安装", "npm test", "中国大陆", "不构成律师委托", "LexFlow", "路线图"]) {
+  for (const token of ["商业律师 Julie", "安装", "npm test", "中国大陆", "不构成律师委托", "路线图"]) {
     assert.match(content, new RegExp(token));
   }
 });
@@ -769,8 +769,8 @@ Include:
 - Mainland China default analysis jurisdiction / applicable-law background, transaction-derived governing law and forum, and cross-border escalation.
 - Privacy/model transmission statement.
 - “不构成律师委托，不替代持证律师正式法律意见” boundary.
-- Explicit statement: LexFlow is not required in v0.1; a read-only project/document adapter is a future roadmap item.
-- Roadmap: authoritative-source updater, LexFlow adapter, richer contract packs, dated evaluation reports.
+- Explicit statement: a project/document adapter is not required in v0.1 and remains a future roadmap item.
+- Roadmap: authoritative-source updater, project/document adapter, richer contract packs, dated evaluation reports.
 - MIT license note.
 
 - [ ] **Step 4: Add MIT license and ignore generated artifacts**
@@ -841,10 +841,10 @@ Expected: No placeholders or prohibited claims. Legitimate explanatory examples 
 Run:
 
 ```bash
-rg -n "jwangkun/LexFlow|Mike|Open Legal Products|AGPL" SKILL.md references templates
+rg -n "Mike|Open Legal Products|AGPL" SKILL.md references templates
 ```
 
-Expected: No copied LexFlow/Mike implementation or AGPL-derived text exists in the distributed Skill. README may mention LexFlow only as an optional future integration boundary.
+Expected: No copied external-adapter/Mike implementation or AGPL-derived text exists in the distributed Skill. README describes only the neutral integration boundary.
 
 - [ ] **Step 4: Review the blind evaluation assets**
 
