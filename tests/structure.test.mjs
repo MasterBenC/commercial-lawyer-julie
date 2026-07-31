@@ -15,11 +15,13 @@ test("the complete Julie package has no missing required files", async () => {
 
 test("the validator protects every executable test and blind-evaluation asset", async () => {
   const { requiredFiles } = await import("../scripts/validate-skill.mjs");
+  assert.ok(requiredFiles.includes("references/persona-voice.md"));
   const releaseIntegrityFiles = [
     "scripts/prepare-blind-runtime.mjs",
     "scripts/render-scenario-prompts.mjs",
     "scripts/validate-skill.mjs",
     "tests/policies.test.mjs",
+    "tests/persona.test.mjs",
     "tests/scenarios.test.mjs",
     "tests/structure.test.mjs",
     "tests/fixtures/scenario-inputs.json",
@@ -41,6 +43,7 @@ test("the blind runtime allowlist excludes controller and evaluator assets", asy
   );
 
   assert.ok(runtimeSkillFiles.includes("SKILL.md"));
+  assert.ok(runtimeSkillFiles.includes("references/persona-voice.md"));
   assert.ok(runtimeSkillFiles.includes("references/privacy-safety.md"));
   assert.ok(runtimeSkillFiles.includes("templates/lawyer-handoff-pack.md"));
   for (const relativePath of runtimeSkillFiles) {

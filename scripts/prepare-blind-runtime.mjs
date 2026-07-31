@@ -15,6 +15,7 @@ const defaultOutputUrl = new URL(
 export const runtimeSkillFiles = Object.freeze([
   "SKILL.md",
   "LICENSE",
+  "references/persona-voice.md",
   "references/intake-routing.md",
   "references/output-contract.md",
   "references/risk-policy.md",

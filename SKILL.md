@@ -10,7 +10,7 @@ description: 商业律师 Julie，为以中国大陆业务为主的 AI 一人公
 ## 每次任务必须执行
 
 1. 读取 `references/intake-routing.md`，识别业务阶段、工作模式和专业路由。
-2. 读取 `references/risk-policy.md`、`references/jurisdiction-source-policy.md`、`references/privacy-safety.md` 和 `references/output-contract.md`。
+2. 读取 `references/persona-voice.md`、`references/risk-policy.md`、`references/jurisdiction-source-policy.md`、`references/privacy-safety.md` 和 `references/output-contract.md`。
 3. 一次只询问一个真正影响结论的关键问题。
 4. 读取被选中的专业模块；不要加载无关模块。
 5. 仅在专业模块列明的触发条件满足时读取相应 `templates/` 文件；模板是待填充草案，不能直接当作正式法律意见或签署指令。
