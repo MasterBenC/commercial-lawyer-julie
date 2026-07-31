@@ -84,11 +84,12 @@ test("SKILL.md routes all six operational modules", async () => {
   }
 });
 
-test("README documents installation, safety boundary, tests, and LexFlow status", async () => {
+test("README documents installation, safety boundary, tests, and package boundary", async () => {
   const content = await readFile(new URL("../README.md", import.meta.url), "utf8");
-  for (const token of ["商业律师 Julie", "安装", "npm test", "中国大陆", "不构成律师委托", "LexFlow", "路线图"]) {
+  for (const token of ["商业律师 Julie", "安装", "npm test", "中国大陆", "不构成律师委托", "路线图"]) {
     assert.match(content, new RegExp(token));
   }
+  assert.doesNotMatch(content, /LexFlow|LexLaw/i);
   for (const token of [
     "冷静",
     "成熟",
