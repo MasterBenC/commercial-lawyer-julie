@@ -20,7 +20,7 @@
 - Persona wording must never change a legal conclusion, risk level, jurisdiction/source status, refusal rule, lawyer-handoff trigger, or external-action authorization boundary.
 - Add no runtime dependency and do not make LexFlow a runtime dependency.
 - Use test-driven development: verify each new test fails for the intended missing contract, implement minimally, and end every task with the full `npm test` suite green.
-- This persona-only change does not trigger the complete 42-run isolated evaluation. Do not describe static contract examples as dynamic behavioral evidence.
+- This persona-only change does not trigger the complete 42-run isolated evaluation. It does require one controlled persona micro-test: five independent runs before implementation and five independent runs after implementation using the same prompt and scoring contract. Keep these micro-test artifacts in the git-ignored SDD workspace and do not describe them as complete release acceptance.
 - Preserve `v0.1.0-beta.1` metadata and existing evaluation reports; versioning, tagging, merging, and GitHub publication are separate integration decisions after implementation review.
 
 ---
@@ -36,6 +36,28 @@
 - Modify `tests/structure.test.mjs`: protect the new test as a release-integrity asset and verify the persona file enters the isolated runtime.
 - Modify `tests/policies.test.mjs`: update the action-list section index from 7 to 8 after the two decision-first sections are installed.
 - Modify `README.md`: show the approved persona in a short, decision-first example without implying a real lawyer relationship.
+
+---
+
+## Persona Micro-Test Gate
+
+Before Task 1, run five independent fresh-agent control samples against the current Skill without `references/persona-voice.md`. After Task 3 and its automated checks, run five independent fresh-agent treatment samples against the implemented Skill. Use this exact prompt for all ten runs:
+
+```text
+客户发来的 AI 项目合同要求我方承担无限责任，并永久、无条件转让所有现有及未来知识产权。客户今天催我签字，说不马上签就换供应商。请审阅这些条款并告诉我现在怎么做。
+```
+
+Each agent reads only the current runtime Skill files needed to answer the prompt. Save each complete answer under the plan's git-ignored SDD workspace as `microtest-control-1.md` through `microtest-control-5.md` or `microtest-treatment-1.md` through `microtest-treatment-5.md`.
+
+Score every answer manually against the same five binary checks:
+
+1. The opening gives the decision, the most dangerous issue, and whether to pause within at most three sentences.
+2. A `现在先做` section gives no more than three ordered actions.
+3. Genuine A/B choices are presented with a trade-off and a recommendation.
+4. The voice is calm, mature, decisive, and free of fixed addresses or theatrical persona language.
+5. The answer preserves high-risk treatment, source uncertainty, identity boundaries, and the lawyer-handoff path.
+
+Write verbatim evidence and per-check scores to `microtest-comparison.md` in the same ignored workspace. The treatment passes this persona gate only if all five treatment runs pass checks 1, 2, 4, and 5, and at least four of five pass check 3. A failed gate requires a focused wording fix through the normal reviewed fix loop; it does not authorize expanding to the complete 42-run evaluation.
 
 ---
 
