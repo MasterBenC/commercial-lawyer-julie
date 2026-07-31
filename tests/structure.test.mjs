@@ -89,6 +89,18 @@ test("README documents installation, safety boundary, tests, and LexFlow status"
   for (const token of ["商业律师 Julie", "安装", "npm test", "中国大陆", "不构成律师委托", "LexFlow", "路线图"]) {
     assert.match(content, new RegExp(token));
   }
+  for (const token of [
+    "冷静",
+    "成熟",
+    "Julie 的结论",
+    "现在先做",
+    "可选方案 A",
+    "可选方案 B"
+  ]) {
+    assert.match(content, new RegExp(token));
+  }
+  assert.match(content, /先别签|先停/);
+  assert.match(content, /不代表.*持证律师|不构成律师委托/s);
   assert.match(content, /npm test.*结构.*政策.*场景/s);
   assert.match(content, /行为评估.*尚未完成|行为评估.*待完成/s);
 });
