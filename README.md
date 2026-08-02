@@ -2,10 +2,11 @@
 
 商业律师 Julie 是面向以中国大陆业务为主的 AI 一人公司（AI OPC）的商业法律风险辅助 Skill。它帮助经营者在接洽、报价、签约、履约、变更、验收、收款和争议处理的业务生命周期中，识别下一步需要确认的事实、风险和材料。
 
-## Beta 状态
+## v0.1.0 评估状态
 
-当前公开版本为 `v0.1.0-beta.1`。自动化结构与政策测试已通过；针对 A02、A03、S05 修复项的 9 次独立回归也已通过。完整 42 次可审计隔离行为评估尚未完成，因此本版本不宣称已达到正式稳定版发布标准。
+风险分层独立评测已接受：18/18 次行为评测 PASS，18/18 次证据在披露的 v0.1 指令约束隔离标准下有效；14/14 个场景和 4/4 组重复关键场景均通过。自动化结构、政策和场景测试也已通过。该证据标准不提供操作系统级隔离证明；这一限制及运行时元数据限制已在报告中披露，不能将指令约束描述为 OS 级沙箱证明。
 
+- [风险分层独立评测报告](evaluations/2026-08-02-risk-tiered-evaluation.md)：记录 v0.1.0 的 18 次评测、14 个场景、4 组关键场景，以及证据限制披露。
 - [完整盲测评分报告](evaluations/2026-07-30-commercial-lawyer-julie-blind-evaluation.md)：记录旧提交的行为与证据阻断项。
 - [修复后针对性回归报告](evaluations/2026-07-30-targeted-regression-8e6db4.md)：记录新提交的 9/9 定向通过结果。
 
@@ -42,11 +43,22 @@ Julie 会按“报价 / 签约”阶段检查权利边界、交付物范围、�
 ```bash
 npm test
 npm run validate
-npm run eval:render
 npm run eval:prepare
+npm run eval:render
+npm run eval:manifest
 ```
 
-`npm test` 运行完整的静态结构、政策内容和场景夹具测试套件；`npm run validate` 检查发布所需文件是否齐全；后两个命令分别生成 prompt-only 输入和不含评估资产的隔离运行时。这些静态检查与资产生成不等于完整行为验收。当前 beta 已完成针对已知缺口的 9 次独立回归；完整 42 次发布验收仍须按 `docs/evaluation.md` 在评分表不可访问、执行环境可审计的隔离环境中完成。
+`npm test` 运行完整的静态结构、政策内容和场景夹具测试套件；`npm run validate` 检查发布所需文件，并机械校验已提交的 metadata schema、18-run index 和评测报告合计；其余命令分别生成 prompt-only 输入、隔离运行时和 18-run manifest。这组标准命令可在不含 gitignored `work/` 原始运行记录的干净发布包（clean release archive）中执行。静态检查与资产生成不等于完整行为验收。v0.1.0 已按 [风险分层独立评测报告](evaluations/2026-08-02-risk-tiered-evaluation.md) 完成 18/18 行为 PASS、14/14 场景和 4/4 重复关键场景通过；证据有效性仅在披露的指令约束隔离标准下成立，未证明 OS 级隔离。
+
+### 评测控制器专用
+
+仅当控制器工作区中的 `work/risk-tiered-evaluation/runs/` 原始 run artifact 全部存在时，才运行：
+
+```bash
+npm run eval:validate-runs
+```
+
+该命令在评分前重新解析 raw run metadata、核对 manifest 并生成规范化 index；它不是干净发布包的标准本地验证命令。原始回答仍留在 gitignored controller work 目录，不会被复制进发布包。
 
 ## 法域、安全与隐私边界
 
