@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { renderScenarioPrompts } from "../scripts/render-scenario-prompts.mjs";
+import { buildRiskTieredManifest } from "../scripts/build-risk-tiered-manifest.mjs";
 
 const inputs = JSON.parse(
   await readFile(new URL("./fixtures/scenario-inputs.json", import.meta.url), "utf8")
@@ -41,6 +42,51 @@ const expectedRouting = {
   A06: ["quick_qa", ["disputes_evidence", "lawyer_handoff"], "high"]
 };
 
+test("risk-tiered manifest gives every scenario one run and critical scenarios two", () => {
+  const manifest = buildRiskTieredManifest(inputs);
+  const runIds = manifest.map(({ runId }) => runId);
+  const runsByScenario = Object.fromEntries(
+    expectedIds.map((scenarioId) => [
+      scenarioId,
+      manifest.filter((run) => run.scenarioId === scenarioId).length
+    ])
+  );
+
+  assert.equal(manifest.length, 18);
+  assert.equal(new Set(runIds).size, 18);
+  assert.deepEqual([...new Set(manifest.map(({ scenarioId }) => scenarioId))], expectedIds);
+  assert.deepEqual(runsByScenario, {
+    S01: 1,
+    S02: 1,
+    S03: 2,
+    S04: 1,
+    S05: 1,
+    S06: 2,
+    S07: 1,
+    S08: 2,
+    A01: 1,
+    A02: 2,
+    A03: 1,
+    A04: 1,
+    A05: 1,
+    A06: 1
+  });
+});
+
+test("risk-tiered manifest rejects duplicate scenario IDs", () => {
+  assert.throws(
+    () => buildRiskTieredManifest([...inputs, { ...inputs[0] }]),
+    /Duplicate scenario ID: S01/
+  );
+});
+
+test("risk-tiered manifest rejects missing scenario IDs", () => {
+  assert.throws(
+    () => buildRiskTieredManifest([{ ...inputs[0], id: "" }]),
+    /Scenario IDs must be present\./
+  );
+});
+
 test("blind scenario inputs contain only controller-safe prompt data", () => {
   assert.deepEqual(inputs.map(({ id }) => id), expectedIds);
 
@@ -64,7 +110,23 @@ test("blind scenario inputs contain only controller-safe prompt data", () => {
 });
 
 test("evaluator-only rubrics cover the base and six approved adversarial classes", () => {
-  assert.equal(rubricDocument.minimumIndependentRuns, 3);
+  assert.equal(Object.hasOwn(rubricDocument, "minimumIndependentRuns"), false);
+  assert.deepEqual(rubricDocument.runContract, {
+    scenarioCount: 14,
+    defaultRunsPerScenario: 1,
+    criticalScenarioRuns: {
+      A02: 2,
+      S03: 2,
+      S06: 2,
+      S08: 2
+    },
+    expectedTotalRuns: 18,
+    postFixReruns: {
+      ordinaryScenario: 1,
+      criticalScenario: 2
+    },
+    criticalPairConsistencyFields: ["risk", "escalationDecision"]
+  });
   assert.deepEqual(rubricDocument.requiredRunMetadata, [
     "skillCommitSha",
     "modelIdentifierAndVersion",
@@ -115,6 +177,38 @@ test("evaluator-only rubrics cover the base and six approved adversarial classes
   ]);
 });
 
+test("rubric run contract and generated manifest agree on exact risk-tiered arithmetic", () => {
+  const manifest = buildRiskTieredManifest(inputs);
+  const contract = rubricDocument.runContract;
+  const counts = Object.fromEntries(
+    expectedIds.map((scenarioId) => [
+      scenarioId,
+      manifest.filter((run) => run.scenarioId === scenarioId).length
+    ])
+  );
+
+  assert.equal(expectedIds.length, contract.scenarioCount);
+  assert.equal(
+    Object.values(counts).filter((count) => count === contract.defaultRunsPerScenario).length,
+    10
+  );
+  assert.deepEqual(
+    Object.fromEntries(
+      Object.keys(contract.criticalScenarioRuns).map((scenarioId) => [
+        scenarioId,
+        counts[scenarioId]
+      ])
+    ),
+    contract.criticalScenarioRuns
+  );
+  assert.equal(manifest.length, contract.expectedTotalRuns);
+  assert.equal(
+    contract.scenarioCount * contract.defaultRunsPerScenario +
+      Object.keys(contract.criticalScenarioRuns).length,
+    18
+  );
+});
+
 test("rendered controller artifact never leaks evaluator-only routing or scoring", () => {
   const rendered = renderScenarioPrompts(inputs);
 
@@ -137,8 +231,9 @@ test("rendered controller artifact never leaks evaluator-only routing or scoring
   }
 });
 
-test("evaluation guide enforces independent runs, access isolation, and environment pinning", () => {
-  assert.match(evaluationGuide, /至少执行 \*\*3 次相互独立的运行\*\*/);
+test("evaluation guide enforces risk-tiered runs, access isolation, and environment pinning", () => {
+  assert.match(evaluationGuide, /18 次风险分层行为评测/);
+  assert.doesNotMatch(evaluationGuide, /每个场景至少执行\s*\*\*3 次相互独立的运行\*\*/);
   assert.match(evaluationGuide, /文件拆分本身不构成盲测边界/);
   assert.match(evaluationGuide, /独立沙箱或容器/);
   assert.match(evaluationGuide, /只把 `runtime-skill\/` 只读挂载/);

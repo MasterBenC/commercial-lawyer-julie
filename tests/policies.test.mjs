@@ -319,3 +319,53 @@ test("handoff module defines every required handoff section", async () => {
     assert.match(content, new RegExp(token));
   }
 });
+
+test("evaluation policy requires the risk-tiered run protocol", async () => {
+  const content = await readFile(new URL("../docs/evaluation.md", import.meta.url), "utf8");
+
+  assert.match(content, /18 次风险分层行为评测/);
+  for (const scenarioId of ["A02", "S03", "S06", "S08"]) {
+    assert.ok(content.includes(`\`${scenarioId}\``));
+  }
+  assert.match(content, /全新 agent 会话/);
+  assert.match(content, /评分表始终留在被测沙箱之外/);
+  assert.doesNotMatch(content, /每个场景至少执行\s*\*\*3 次相互独立的运行\*\*/);
+});
+
+test("evaluation policy fixes the 14 plus 4 arithmetic and pair consistency gates", async () => {
+  const content = await readFile(new URL("../docs/evaluation.md", import.meta.url), "utf8");
+
+  assert.match(content, /14\s*个场景[^\n]*各[^\n]*1\s*次/);
+  assert.match(content, /4\s*个关键场景[^\n]*各[^\n]*增加[^\n]*1\s*次/);
+  assert.match(content, /14\s*\+\s*4\s*=\s*18/);
+  assert.match(content, /关键场景[^\n]*风险等级[^\n]*升级判断[^\n]*一致/);
+});
+
+test("evaluation policy requires one ordinary and two critical post-fix reruns", async () => {
+  const content = await readFile(new URL("../docs/evaluation.md", import.meta.url), "utf8");
+
+  assert.match(content, /普通场景[^\n]*修复后[^\n]*1\s*次独立复测/);
+  assert.match(content, /关键场景[^\n]*修复后[^\n]*2\s*次独立复测/);
+});
+
+test("evaluation policy identifies the completed report without claiming static checks are behavioral evidence", async () => {
+  const content = await readFile(new URL("../docs/evaluation.md", import.meta.url), "utf8");
+
+  assert.doesNotMatch(content, /尚未产生任何行为评估结果/);
+  assert.match(
+    content,
+    /2026-08-02[^\n]*\[.*风险分层.*报告.*\]\(\.\.\/evaluations\/2026-08-02-risk-tiered-evaluation\.md\)/
+  );
+  assert.match(content, /静态测试[^\n]*不能替代[^\n]*行为评测/);
+});
+
+test("evaluation policy accepts and discloses the v0.1 instruction-enforced isolation fallback", async () => {
+  const content = await readFile(new URL("../docs/evaluation.md", import.meta.url), "utf8");
+
+  assert.match(content, /v0\.1 可接受的降级证据标准/);
+  assert.match(content, /每次运行使用全新上下文/);
+  assert.match(content, /被测 agent 的 prompt 不得包含评分表或旧回答/);
+  assert.match(content, /调度指令必须明确限制文件访问/);
+  assert.match(content, /不存在操作系统级文件系统隔离证明/);
+  assert.match(content, /更强但可选的实现.*独立沙箱或容器/s);
+});

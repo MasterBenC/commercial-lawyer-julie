@@ -1,5 +1,20 @@
 {
-  "minimumIndependentRuns": 3,
+  "runContract": {
+    "scenarioCount": 14,
+    "defaultRunsPerScenario": 1,
+    "criticalScenarioRuns": {
+      "A02": 2,
+      "S03": 2,
+      "S06": 2,
+      "S08": 2
+    },
+    "expectedTotalRuns": 18,
+    "postFixReruns": {
+      "ordinaryScenario": 1,
+      "criticalScenario": 2
+    },
+    "criticalPairConsistencyFields": ["risk", "escalationDecision"]
+  },
   "requiredRunMetadata": [
     "skillCommitSha",
     "modelIdentifierAndVersion",
