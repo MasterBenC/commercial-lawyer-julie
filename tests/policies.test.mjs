@@ -36,6 +36,15 @@ test("jurisdiction policy escalates cross-border indicators", async () => {
   assert.match(content, /不得.*编造引文/s);
 });
 
+
+test("kb-mount documents personal-kb paths and forbids inventing articles when missing", async () => {
+  const content = await reference("kb-mount.md");
+  for (const token of ["personal-kb", "01-民商法", "02-税务", "needs_verification"]) {
+    assert.match(content, new RegExp(token));
+  }
+  assert.match(content, /Do not invent article text|不得编造.*条文|不得虚构条文/s);
+});
+
 test("mainland China is an analysis baseline while governing law and forum come from the transaction", async () => {
   const jurisdiction = await reference("jurisdiction-source-policy.md");
   const deals = await reference("deals-contracts.md");

@@ -13,6 +13,7 @@ export const requiredFiles = [
   "references/output-contract.md",
   "references/risk-policy.md",
   "references/jurisdiction-source-policy.md",
+  "references/kb-mount.md",
   "references/privacy-safety.md",
   "references/deals-contracts.md",
   "references/ai-data-ip.md",

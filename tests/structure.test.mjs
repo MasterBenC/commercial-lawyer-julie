@@ -220,7 +220,7 @@ test("release metadata documents the accepted risk-tiered evaluation without ove
   );
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.1.0");
+  assert.equal(packageJson.version, "0.2.0");
   assert.match(readme, /18\/18/);
   assert.match(readme, /14\/14/);
   assert.match(readme, /4\/4/);
