@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { access, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -299,6 +299,31 @@ export function validateNormalizedRunIndex(index, schema) {
   return { valid: true, runCount: index.runs.length, criticalPairs };
 }
 
+export async function hasRawRunArtifacts({ rootUrl = defaultRootUrl } = {}) {
+  const runsDirectory = path.join(fileURLToPath(rootUrl), "work/risk-tiered-evaluation/runs");
+  try {
+    await access(runsDirectory);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 发布仓库的兜底校验：work/ 被 gitignore，原始 run artifact 不在库内，
+ * 无法与 manifest 逐条比对；此时改为机械校验已提交的归一化索引（18 runs + schema）。
+ */
+export async function validateCommittedIndex({ rootUrl = defaultRootUrl } = {}) {
+  const root = fileURLToPath(rootUrl);
+  const schemaPath = path.join(root, "evaluations/run-metadata.schema.json");
+  const indexPath = path.join(root, "evaluations/2026-08-02-risk-tiered-run-metadata.json");
+  const [schema, index] = await Promise.all([
+    readFile(schemaPath, "utf8").then(JSON.parse),
+    readFile(indexPath, "utf8").then(JSON.parse)
+  ]);
+  return { ...validateNormalizedRunIndex(index, schema), indexPath };
+}
+
 export async function buildAndValidateRunIndex({ rootUrl = defaultRootUrl } = {}) {
   const root = fileURLToPath(rootUrl);
   const manifestPath = path.join(root, "work/risk-tiered-evaluation/manifest.json");
@@ -348,6 +373,16 @@ export async function buildAndValidateRunIndex({ rootUrl = defaultRootUrl } = {}
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const result = await buildAndValidateRunIndex();
-  console.log(`Validated ${result.runCount} raw run artifacts and wrote normalized metadata index.`);
+  if (await hasRawRunArtifacts()) {
+    const result = await buildAndValidateRunIndex();
+    console.log(`Validated ${result.runCount} raw run artifacts and wrote normalized metadata index.`);
+  } else {
+    const result = await validateCommittedIndex();
+    console.log(
+      "Raw run artifacts are not part of this repository (work/ is git-ignored), so the manifest inventory cannot be re-diffed here."
+    );
+    console.log(
+      `Validated the committed normalized index instead: ${result.runCount} runs against evaluations/run-metadata.schema.json.`
+    );
+  }
 }

@@ -17,11 +17,11 @@ v0.2.0 是知识库挂载与引用策略重建：新增 `references/kb-mount.md`
 | 命令 | 退出码 | 实际结果 |
 |------|--------|----------|
 | `node scripts/validate-skill.mjs` | 0 | 输出 `商业律师 Julie package is structurally valid.`；发布必需文件齐备，已提交的 metadata schema、18-run index 与评测报告合计（18 runs、4 组关键场景）机械校验通过。 |
-| `npm test`（等价 `node --test tests/*.test.mjs`） | 0 | 52/52 通过：结构、政策文案、场景夹具与 run-artifact 规范化测试。 |
+| `npm test`（等价 `node --test tests/*.test.mjs`） | 0 | 53/53 通过：结构、政策文案、场景夹具、run-artifact 规范化，以及缺原始产物时的已提交索引独立校验。 |
 | `node scripts/prepare-blind-runtime.mjs` | 0 | 生成 21 个文件的隔离运行时 `work/blind-evaluation/runtime-skill/`，不含 `tests/`、`docs/`、`scripts/` 与评分表。 |
 | `node scripts/render-scenario-prompts.mjs` | 0 | 生成 `work/evaluation-prompts.md`：14 个场景，仅盲测输入，无评分表字段。 |
 | `node scripts/build-risk-tiered-manifest.mjs` | 0 | 生成 18-run manifest：14 个场景各 1 次，`A02`/`S03`/`S06`/`S08` 各加 1 次。 |
-| `node scripts/validate-run-artifacts.mjs` | 1 | 预期失败：控制器原始 run artifact（`work/risk-tiered-evaluation/runs/`，已被 gitignore）不在本机，报 `ENOENT: no such file or directory, scandir .../work/risk-tiered-evaluation/runs`。该命令只在控制器工作区原始记录齐全时运行。 |
+| `node scripts/validate-run-artifacts.mjs` | 0 | 通过：原始 run artifact 目录（`work/risk-tiered-evaluation/runs/`，`work/` 被 gitignore）不在发布包内时，脚本自动降级为机械校验已提交的归一化索引，输出 `Validated the committed normalized index instead: 18 runs against evaluations/run-metadata.schema.json.`；在原始记录齐全的控制器工作区，仍走重建索引并与 manifest 逐条比对原路径。 |
 
 **未重跑 / 待外部 API**
 

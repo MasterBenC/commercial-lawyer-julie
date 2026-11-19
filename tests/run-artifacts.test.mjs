@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
   normalizeRunArtifact,
+  validateCommittedIndex,
   validateNormalizedRunIndex
 } from "../scripts/validate-run-artifacts.mjs";
 
@@ -73,4 +74,12 @@ test("metadata validator rejects malformed risk and critical-pair inconsistency"
     () => validateNormalizedRunIndex(inconsistentPair, schema),
     /A02.*escalationDecision/
   );
+});
+
+test("committed normalized index validates standalone when raw artifacts are absent", async () => {
+  const result = await validateCommittedIndex();
+
+  assert.equal(result.valid, true);
+  assert.equal(result.runCount, 18);
+  assert.equal(result.indexPath.endsWith("evaluations/2026-08-02-risk-tiered-run-metadata.json"), true);
 });

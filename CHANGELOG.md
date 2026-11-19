@@ -18,6 +18,7 @@
 - README「LexFlow 边界与路线图」改为 v0.2 现状表述：LexFlow 仍非运行时依赖，边界与授权口径不变。
 - `references/kb-mount.md` 新增「自建本地知识库最小目录与 `_index.md` 脱敏示例」，外部用户可不依赖 `MasterBenC/personal-kb` 与 `MasterBenC/miit-qualification-kb` 接入自有法务知识库；合规边界保持不变：私有库正文不随 Skill 分发，未挂载时黑字规则一律 `needs_verification`，示例内容脱敏虚构。
 - `tests/structure.test.mjs`：修正查找 npm CLI 的兜底路径，使 `node --test tests/*.test.mjs` 在 node 与 npm 未安装于同一目录时也能跑完整套件；断言语义未变。
+- `scripts/validate-run-artifacts.mjs`：新增降级路径——`work/`（原始 run artifact）不在发布包内时，不再以 `ENOENT` 崩溃，改为机械校验已提交的归一化索引（18 runs + `run-metadata.schema.json`）并以退出码 0 结束；原始记录齐全的控制器工作区仍走重建索引与 manifest 逐条比对。`tests/run-artifacts.test.mjs` 增加对应测试，套件 52 → 53。
 
 ## 0.1.0
 
