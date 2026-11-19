@@ -11,6 +11,24 @@ import { validateSkill } from "../scripts/validate-skill.mjs";
 
 const execFileAsync = promisify(execFile);
 
+// Run npm inside the throwaway release copy. `npm_execpath` is only set when the
+// suite itself was started through npm; otherwise fall back to a bundled npm CLI
+// next to the node binary, and finally to the npm executable on PATH, so the
+// suite also runs under a bare `node --test tests/*.test.mjs`.
+async function execNpm(npmArguments, options) {
+  const candidateCliPath = process.env.npm_execpath ?? path.join(
+    path.dirname(process.execPath),
+    "node_modules/npm/bin/npm-cli.js"
+  );
+  if (existsSync(candidateCliPath)) {
+    return execFileAsync(process.execPath, [candidateCliPath, ...npmArguments], options);
+  }
+  return execFileAsync("npm", npmArguments, {
+    ...options,
+    shell: process.platform === "win32"
+  });
+}
+
 test("the complete Julie package has no missing required files", async () => {
   const result = await validateSkill(new URL("../", import.meta.url));
   assert.deepEqual(result.missing, []);
@@ -125,11 +143,7 @@ test(
         ["run", "eval:render"],
         ["run", "eval:manifest"]
       ]) {
-        const npmCliPath = process.env.npm_execpath ?? path.join(
-          path.dirname(process.execPath),
-          "node_modules/npm/bin/npm-cli.js"
-        );
-        await execFileAsync(process.execPath, [npmCliPath, ...npmArguments], {
+        await execNpm(npmArguments, {
           cwd: temporaryRoot,
           env: process.env,
           maxBuffer: 20 * 1024 * 1024

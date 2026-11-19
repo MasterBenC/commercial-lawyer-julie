@@ -4,11 +4,30 @@
 
 ## v0.2.0 说明（KB 联动重建）
 
-v0.2.0 是知识库挂载与引用策略重建：新增 `references/kb-mount.md`，并在法域政策与交易 / 争议 / 开票模块中写明 `01-民商法` / `02-税务` / `03-交汇专题` 的只读地图。人格、工作模式、风险分级、模板路由与禁止事项保持与 v0.1 一致。
+v0.2.0 是知识库挂载与引用策略重建：新增 `references/kb-mount.md`，并在法域政策与交易 / 争议 / 开票模块中写明 `01-民商法` / `02-税务` / `03-交汇专题` 的只读地图；同时提供「自建本地知识库最小目录与 `_index.md` 脱敏示例」，使外部用户不依赖私有库也能接入自有法务知识库。人格、工作模式、风险分级、模板路由与禁止事项保持与 v0.1 一致。
 
-**行为评测证据仍以 v0.1 套件为准**，尚未按 v0.2 提示词重跑；下列报告记录的是 v0.1 风险分层独立评测结果，直至另行重跑并替换。
+**行为评测证据仍以 v0.1 套件为准**：v0.2.0 的 18 次风险分层行为评测尚未重跑，下列报告记录的是 v0.1 风险分层独立评测结果，直至另行重跑并替换。
 
-## v0.1.0 评估状态
+## v0.2.0 评测状态（截至 2026-11-19，如实区分已跑与待跑）
+
+静态校验与行为评测是两类证据，下列结果逐条对应真实运行，未经运行的项一律标注「未重跑 / 待外部 API」，不提供任何推测分数。
+
+**已在本机离线真实运行（不调用任何模型 API）**
+
+| 命令 | 退出码 | 实际结果 |
+|------|--------|----------|
+| `node scripts/validate-skill.mjs` | 0 | 输出 `商业律师 Julie package is structurally valid.`；发布必需文件齐备，已提交的 metadata schema、18-run index 与评测报告合计（18 runs、4 组关键场景）机械校验通过。 |
+| `npm test`（等价 `node --test tests/*.test.mjs`） | 0 | 52/52 通过：结构、政策文案、场景夹具与 run-artifact 规范化测试。 |
+| `node scripts/prepare-blind-runtime.mjs` | 0 | 生成 21 个文件的隔离运行时 `work/blind-evaluation/runtime-skill/`，不含 `tests/`、`docs/`、`scripts/` 与评分表。 |
+| `node scripts/render-scenario-prompts.mjs` | 0 | 生成 `work/evaluation-prompts.md`：14 个场景，仅盲测输入，无评分表字段。 |
+| `node scripts/build-risk-tiered-manifest.mjs` | 0 | 生成 18-run manifest：14 个场景各 1 次，`A02`/`S03`/`S06`/`S08` 各加 1 次。 |
+| `node scripts/validate-run-artifacts.mjs` | 1 | 预期失败：控制器原始 run artifact（`work/risk-tiered-evaluation/runs/`，已被 gitignore）不在本机，报 `ENOENT: no such file or directory, scandir .../work/risk-tiered-evaluation/runs`。该命令只在控制器工作区原始记录齐全时运行。 |
+
+**未重跑 / 待外部 API**
+
+v0.2.0 的 18 次风险分层行为评测尚未执行。本仓库不含内置模型调用脚本，行为评测必须由控制器以全新 agent 会话逐场景运行；本机未配置 `ANTHROPIC_API_KEY`、`OPENAI_API_KEY` 等评测密钥，因此 v0.2.0 **没有任何**行为评测分数，也不由本仓库合成分数。重跑命令与运行协议见 [`docs/evaluation.md`](docs/evaluation.md) 与下方「本地验证」。
+
+## v0.1.0 行为评测状态（现行行为证据）
 
 风险分层独立评测已接受：18/18 次行为评测 PASS，18/18 次证据在披露的 v0.1 指令约束隔离标准下有效；14/14 个场景和 4/4 组重复关键场景均通过。自动化结构、政策和场景测试也已通过。该证据标准不提供操作系统级隔离证明；这一限制及运行时元数据限制已在报告中披露，不能将指令约束描述为 OS 级沙箱证明。
 
@@ -62,7 +81,7 @@ npm run eval:render
 npm run eval:manifest
 ```
 
-`npm test` 运行完整的静态结构、政策内容和场景夹具测试套件；`npm run validate` 检查发布所需文件，并机械校验已提交的 metadata schema、18-run index 和评测报告合计；其余命令分别生成 prompt-only 输入、隔离运行时和 18-run manifest。这组标准命令可在不含 gitignored `work/` 原始运行记录的干净发布包（clean release archive）中执行。静态检查与资产生成不等于完整行为验收。v0.1.0 已按 [风险分层独立评测报告](evaluations/2026-08-02-risk-tiered-evaluation.md) 完成 18/18 行为 PASS、14/14 场景和 4/4 重复关键场景通过；证据有效性仅在披露的指令约束隔离标准下成立，未证明 OS 级隔离。v0.2.0 未重跑该行为套件。
+`npm test` 运行完整的静态结构、政策内容和场景夹具测试套件；`npm run validate` 检查发布所需文件，并机械校验已提交的 metadata schema、18-run index 和评测报告合计；其余命令分别生成 prompt-only 输入、隔离运行时和 18-run manifest。这组标准命令可在不含 gitignored `work/` 原始运行记录的干净发布包（clean release archive）中执行。静态检查与资产生成不等于完整行为验收。v0.1.0 已按 [风险分层独立评测报告](evaluations/2026-08-02-risk-tiered-evaluation.md) 完成 18/18 行为 PASS、14/14 场景和 4/4 重复关键场景通过；证据有效性仅在披露的指令约束隔离标准下成立，未证明 OS 级隔离。v0.2.0 未重跑该行为套件，实际已跑项与待跑项见上文「v0.2.0 评测状态」。
 
 ### 评测控制器专用
 
@@ -72,7 +91,23 @@ npm run eval:manifest
 npm run eval:validate-runs
 ```
 
-该命令在评分前重新解析 raw run metadata、核对 manifest 并生成规范化 index；它不是干净发布包的标准本地验证命令。原始回答仍留在 gitignored controller work 目录，不会被复制进发布包。
+该命令在评分前重新解析 raw run metadata、核对 manifest 并生成规范化 index；它不是干净发布包的标准本地验证命令。原始回答仍留在 gitignored controller work 目录，不会被复制进发布包。在缺少控制器原始记录的机器上，该命令以 `ENOENT` 退出码 1 结束，这是预期行为，不代表包结构有问题。
+
+### 行为评测重跑（需外部模型 API，尚未执行）
+
+v0.2.0 的 18 次风险分层行为评测需要独立的模型 API 与控制器调度，无法只靠本仓库离线完成。密钥就绪后，在控制器工作区按下列顺序执行：
+
+```bash
+git rev-parse HEAD                 # 固定被测提交 SHA
+npm test && npm run validate       # 静态门槛
+npm run eval:render                # 生成 work/evaluation-prompts.md（14 个盲测输入）
+npm run eval:prepare               # 生成 work/blind-evaluation/runtime-skill/
+npm run eval:manifest              # 生成 18-run manifest
+# 逐场景在全新 agent 会话运行 18 次，原始记录写入 work/risk-tiered-evaluation/runs/
+npm run eval:validate-runs         # 校验 raw metadata 并生成规范化 index
+```
+
+未完成上述运行前，README 与报告中不得出现任何 v0.2 行为通过率或分数；现行行为证据仅为下文 v0.1.0 套件。
 
 ## 法域、安全与隐私边界
 
@@ -84,7 +119,7 @@ npm run eval:validate-runs
 
 ## LexFlow 边界与路线图
 
-v0.1 不需要 LexFlow；Julie 可作为独立 Skill 使用。LexFlow 仅是未来可选的只读项目 / 文档适配器方向，不是运行时依赖，也不会因此自动获得任何用户资料的额外授权。
+v0.2 仍不需要 LexFlow；Julie 作为独立 Skill 即可完成当前全部工作，v0.2.0 的知识库联动也只在宿主本地目录层面发生，不引入任何服务端依赖。LexFlow 仅是未来可选的只读项目 / 文档适配器方向，不是运行时依赖，也不会因此自动获得任何用户资料的额外授权；在此之前，Julie 的挂载与引用状态规则（含 `needs_verification` 强制标记）保持不变。
 
 路线图包括：
 
