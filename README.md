@@ -1,6 +1,6 @@
 # 商业律师 Julie
 
-商业律师 Julie 是面向以中国大陆业务为主的 AI 一人公司（AI OPC）的商业法律风险辅助 Skill。它帮助经营者在接洽、报价、签约、履约、变更、验收、收款和争议处理的业务生命周期中，识别下一步需要确认的事实、风险和材料。自 **v0.2.0** 起，Julie 在主张民商法 / 税法黑字规则前，优先检索宿主挂载的私有知识库 [personal-kb](https://github.com/MasterBenC/personal-kb)（本仓库**不附带**该私库正文）；未挂载时仍可工作，但对拟引规则强制 `needs_verification`，不得编造条文。
+商业律师 Julie 是面向以中国大陆业务为主的 AI 一人公司（AI OPC）的商业法律风险辅助 Skill。它帮助经营者在接洽、报价、签约、履约、变更、验收、收款和争议处理的业务生命周期中，识别下一步需要确认的事实、风险和材料。自 **v0.2.0** 起，Julie 在主张民商法 / 税法黑字规则前，优先检索宿主挂载的本地法务知识库（根目录记为 `<KB_ROOT>`，本仓库**不附带**任何库内正文）；未挂载时仍可工作，但对拟引规则强制 `needs_verification`，不得编造条文。
 
 ## v0.2.0 说明（KB 联动重建）
 
@@ -17,7 +17,7 @@ v0.2.0 是知识库挂载与引用策略重建：新增 `references/kb-mount.md`
 | 命令 | 退出码 | 实际结果 |
 |------|--------|----------|
 | `node scripts/validate-skill.mjs` | 0 | 输出 `商业律师 Julie package is structurally valid.`；发布必需文件齐备，已提交的 metadata schema、18-run index 与评测报告合计（18 runs、4 组关键场景）机械校验通过。 |
-| `npm test`（等价 `node --test tests/*.test.mjs`） | 0 | 53/53 通过：结构、政策文案、场景夹具、run-artifact 规范化，以及缺原始产物时的已提交索引独立校验。 |
+| `npm test`（等价 `node --test tests/*.test.mjs`） | 0 | 70/70 通过：结构、政策文案、知识库边界与引用契约、场景夹具、run-artifact 规范化，以及缺原始产物时的已提交索引独立校验。 |
 | `node scripts/prepare-blind-runtime.mjs` | 0 | 生成 21 个文件的隔离运行时 `work/blind-evaluation/runtime-skill/`，不含 `tests/`、`docs/`、`scripts/` 与评分表。 |
 | `node scripts/render-scenario-prompts.mjs` | 0 | 生成 `work/evaluation-prompts.md`：14 个场景，仅盲测输入，无评分表字段。 |
 | `node scripts/build-risk-tiered-manifest.mjs` | 0 | 生成 18-run manifest：14 个场景各 1 次，`A02`/`S03`/`S06`/`S08` 各加 1 次。 |
@@ -26,6 +26,11 @@ v0.2.0 是知识库挂载与引用策略重建：新增 `references/kb-mount.md`
 **未重跑 / 待外部 API**
 
 v0.2.0 的 18 次风险分层行为评测尚未执行。本仓库不含内置模型调用脚本，行为评测必须由控制器以全新 agent 会话逐场景运行；本机未配置 `ANTHROPIC_API_KEY`、`OPENAI_API_KEY` 等评测密钥，因此 v0.2.0 **没有任何**行为评测分数，也不由本仓库合成分数。重跑命令与运行协议见 [`docs/evaluation.md`](docs/evaluation.md) 与下方「本地验证」。
+
+**v0.2 知识库与边界回归用例（仅用例定义，无跑分）**
+
+- [`evaluations/v0.2-kb-boundary-regression-cases.md`](evaluations/v0.2-kb-boundary-regression-cases.md) / [`.json`](evaluations/v0.2-kb-boundary-regression-cases.json)：定义 K01–K08 八个回归用例，覆盖知识库挂载探测、目录+关键词定位、`kb` 单行紧凑与 `verified` 6 字段引用格式、中高风险断网降级、7 段外层嵌套 10 部分交接包、库文件提示词注入、`敏感: 是` 目录不默认加载、材料审查提问节奏。
+- 这些文件只是**待执行**的用例规范：不包含任何模型输出、跑分、通过率或结论。执行后必须在控制器工作区留下真实 run 记录，才能在此处追加结果；未跑完前本仓库不得声称 v0.2 行为通过。
 
 ## v0.1.0 行为评测状态（现行行为证据）
 
@@ -43,21 +48,22 @@ Julie 支持三种可切换的工作模式：
 - **材料审查**：审查合同、报价单、工作说明、沟通记录或证据材料。
 - **流程陪跑**：根据交易所处阶段给出下一步的法律与商业行动建议。
 
-它还覆盖交易与合同、AI 数据与知识产权、履约变更验收、开票收款、争议证据和律师交接等模块。输出是风险辅助与文本草案，不会自动向外发送、签署、付款或提交任何材料。在 personal-kb 已挂载时，也可用于一般民商交易审查（仍非律师委托）。
+它还覆盖交易与合同、AI 数据与知识产权、履约变更验收、开票收款、争议证据和律师交接等模块。输出是风险辅助与文本草案，不会自动向外发送、签署、付款或提交任何材料。在本地知识库（`<KB_ROOT>`）已挂载时，也可用于一般民商交易审查（仍非律师委托）。
 
-## 与 personal-kb 联动
+## 与本地知识库联动
 
-- 私库：[MasterBenC/personal-kb](https://github.com/MasterBenC/personal-kb)（private）。Julie **不打包、不镜像**其中的法条正文。
-- 挂载：设置 `PERSONAL_KB_ROOT`，或将仓库克隆为与本 Skill 同级的 `../personal-kb`，或在宿主中配置绝对路径。细则见 [`references/kb-mount.md`](references/kb-mount.md)。
-- 默认只读：`01-民商法/`；涉税商事加读 `02-税务/`；结构 / 家办 / 股权+税交汇加读 `03-交汇专题/`；**永不默认加载** `05-客户案例-脱敏/`。
-- 引用状态：`kb`（库内读出）→ 正式对外或中高风险时升级 `verified`（国家法律法规数据库等）；库缺失则 `needs_verification` / `unavailable`。
-- 可选二级库：[miit-qualification-kb](https://github.com/MasterBenC/miit-qualification-kb) — 仅当用户询问高新 / 专精特新 / 单项冠军 / 申报时使用，非 Julie 运行依赖。
+- 知识库根目录统一记为 **`<KB_ROOT>`**（含 `_index.md` 的那一层），可以是任意本地路径或私有仓库克隆；Julie **不打包、不镜像**其中任何法条正文。
+- 挂载（可执行步骤，细则见 [`references/kb-mount.md`](references/kb-mount.md)）：① 优先用宿主或对话显式给出的路径；② 否则依次尝试读取 `<Skill 根>/../personal-kb/_index.md` 与 `PERSONAL_KB_ROOT`（`<KB_ROOT>`）指向的 `_index.md`；③ 任一步可读即视为已挂载；全部失败或宿主无文件读取能力则按未挂载处理，并在输出开头注明“本地知识库未挂载或不可读”。
+- 默认只读：`01-民商法/`；涉税商事加读 `02-税务/`；结构 / 家办 / 股权+税交汇加读 `03-交汇专题/`。主题定位用“目录 + 关键词”，不依赖带日期的文件名。
+- 敏感目录：以 `_index.md` 的 `敏感: 是/否` 字段判定；标为 `敏感: 是` 的目录（客户案例、工作底稿等）**不得默认加载**。
+- 引用状态：`kb`（库内读出，单行紧凑格式）→ 正式对外或中高风险时升级 `verified`（6 个字段齐全）；库缺失或中高风险断网无法一手核验时，只能标 `kb（未经官方核验）` / `needs_verification`，不得标 `verified`，并在「是否需要真人律师」标注“条文未经官方核验”。
+- 可选二级库（高新 / 专精特新 / 单项冠军 / 申报）：仅在用户明确问及时使用，入口另设 `<QUALIFICATION_KB_ROOT>`，非 Julie 运行依赖。
 
 ## 示例
 
 > 我为客户制作 AI 内容服务，客户要求将全部提示词和模型工作流永久转让；报价已确认但尚未签约。请审查风险并给我下一步沟通要点。
 
-Julie 会按“报价 / 签约”阶段检查权利边界、交付物范围、付款条件、客户素材和模型使用安排；若涉及境外主体、外国法、香港、境外付款或跨境数据，会标记为“跨境”并建议进一步核验或律师交接。若已挂载 personal-kb，主张合同编 / 公司法相关规则时会先打开映射路径并标注来源状态。
+Julie 会按“报价 / 签约”阶段检查权利边界、交付物范围、付款条件、客户素材和模型使用安排；若涉及境外主体、外国法、香港、境外付款或跨境数据，会标记为“跨境”并建议进一步核验或律师交接。若已挂载本地知识库，主张合同编 / 公司法相关规则时会按“目录 + 关键词”定位文件并标注来源状态。
 
 ## 安装
 
@@ -67,7 +73,7 @@ Julie 会按“报价 / 签约”阶段检查权利边界、交付物范围、�
 <host-skill-directory>/commercial-lawyer-julie/
 ```
 
-安装后，宿主会读取 `SKILL.md` 并按其中的路由加载相应参考资料和模板。本包不要求运行时依赖或外部服务。若需 KB 优先引用，另将 `personal-kb` 按上一节挂载。
+安装后，宿主会读取 `SKILL.md` 并按其中的路由加载相应参考资料和模板。本包不要求运行时依赖或外部服务。若需 KB 优先引用，另将本地知识库按上一节挂载（可用 `kb.local.md` 在本地写个人路径覆盖，该文件已被 `.gitignore` 忽略）。
 
 ## 本地验证
 
@@ -109,6 +115,17 @@ npm run eval:validate-runs         # 校验 raw metadata 并生成规范化 inde
 
 未完成上述运行前，README 与报告中不得出现任何 v0.2 行为通过率或分数；现行行为证据仅为下文 v0.1.0 套件。
 
+### CI 门禁（GitHub Actions）
+
+`.github/workflows/ci.yml` 在 `push` 到 `main` 和 `pull_request` 时执行同一套离线门禁（Node 20 与 22 矩阵）：
+
+```bash
+node scripts/validate-skill.mjs     # 发布必需文件 + 已提交评测元数据机械校验
+node --test tests/*.test.mjs        # 结构 / 政策文案 / 场景夹具 / run-artifact 全套测试
+```
+
+同时校验私有知识库结构不得回流到公开文档：`README.md`、`SKILL.md`、`references/` 中一旦出现私有仓库名或私有目录名，CI 直接失败。CI 只证明静态一致性，不能被解释为行为评测通过。
+
 ## 法域、安全与隐私边界
 
 - 中国大陆是默认分析法域和适用法背景，不是对合同适用法律、法院或仲裁地的预设。涉及香港、外国法、境外主体、境外付款或跨境数据时，必须标记“跨境”，从交易事实核验实际安排，并在需要时交接持证律师。
@@ -127,7 +144,7 @@ v0.2 仍不需要 LexFlow；Julie 作为独立 Skill 即可完成当前全部工
 - LexFlow 只读适配器；
 - 更丰富的合同文件包；
 - 带日期的情景评估报告；
-- personal-kb 同步与正式核验工作流。
+- personal-kb 类知识库的同步与正式核验工作流。
 
 ## 许可证
 

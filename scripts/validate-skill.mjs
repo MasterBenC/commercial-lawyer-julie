@@ -37,6 +37,7 @@ export const requiredFiles = [
   "tests/policies.test.mjs",
   "tests/run-artifacts.test.mjs",
   "tests/scenarios.test.mjs",
+  "tests/kb-boundary.test.mjs",
   "tests/fixtures/scenario-inputs.json",
   "tests/fixtures/scenario-rubrics.json",
   "docs/evaluation.md",
@@ -47,8 +48,71 @@ export const requiredFiles = [
   "evaluations/2026-07-30-commercial-lawyer-julie-blind-evaluation.md",
   "evaluations/2026-07-30-commercial-lawyer-julie-blind-evaluation.json",
   "evaluations/2026-07-30-targeted-regression-8e6db4.md",
-  "evaluations/2026-07-30-targeted-regression-8e6db4.json"
+  "evaluations/2026-07-30-targeted-regression-8e6db4.json",
+  "evaluations/v0.2-kb-boundary-regression-cases.md",
+  "evaluations/v0.2-kb-boundary-regression-cases.json",
+  ".github/workflows/ci.yml"
 ];
+
+const kbBoundaryCasesFile = "evaluations/v0.2-kb-boundary-regression-cases.json";
+const expectedKbBoundaryCaseIds = ["K01", "K02", "K03", "K04", "K05", "K06", "K07", "K08"];
+const forbiddenResultKeys = /^(scores?|passed|passrate|passcount|results?|verdict|accuracy|outcome)$/i;
+
+function collectResultKeys(value, trail, hits) {
+  if (Array.isArray(value)) {
+    value.forEach((entry, i) => collectResultKeys(entry, `${trail}[${i}]`, hits));
+    return hits;
+  }
+  if (value === null || typeof value !== "object") return hits;
+  for (const [key, nested] of Object.entries(value)) {
+    const at = trail ? `${trail}.${key}` : key;
+    if (forbiddenResultKeys.test(key)) hits.push(at);
+    collectResultKeys(nested, at, hits);
+  }
+  return hits;
+}
+
+async function validateKbBoundaryCases(root) {
+  try {
+    const suite = JSON.parse(await readFile(path.join(root, kbBoundaryCasesFile), "utf8"));
+    const problems = [];
+    if (suite.status !== "defined_not_run") {
+      problems.push(`status must stay "defined_not_run" until real runs exist (found ${JSON.stringify(suite.status)})`);
+    }
+    const cases = Array.isArray(suite.cases) ? suite.cases : [];
+    const ids = cases.map((entry) => entry?.id);
+    if (ids.join(",") !== expectedKbBoundaryCaseIds.join(",")) {
+      problems.push(`cases must define ${expectedKbBoundaryCaseIds.join("/")} in order (found ${ids.join(",") || "none"})`);
+    }
+    if (new Set(ids).size !== ids.length) problems.push("case ids must be unique");
+    for (const entry of cases) {
+      const id = entry?.id ?? "unknown";
+      if (typeof entry?.input !== "string" || entry.input.trim() === "") {
+        problems.push(`${id}: input must be a non-empty blind prompt`);
+      }
+      const expected = entry?.rubric?.expectedBehaviors;
+      if (!Array.isArray(expected) || expected.length < 2) {
+        problems.push(`${id}: rubric.expectedBehaviors must list at least 2 observable behaviors`);
+      }
+      const forbidden = entry?.rubric?.forbiddenClaims;
+      if (!Array.isArray(forbidden) || forbidden.length < 1) {
+        problems.push(`${id}: rubric.forbiddenClaims must list at least 1 claim`);
+      }
+      for (const claim of forbidden ?? []) {
+        if (typeof claim?.claim !== "string" || claim.claim.trim() === "") {
+          problems.push(`${id}: every forbiddenClaim needs a non-empty claim`);
+        }
+      }
+    }
+    const resultKeys = collectResultKeys(suite, "", []);
+    if (resultKeys.length > 0) {
+      problems.push(`case definitions must not carry run results or scores (found ${resultKeys.join(", ")})`);
+    }
+    return problems.map((message) => `${kbBoundaryCasesFile}: ${message}`);
+  } catch (error) {
+    return [`${kbBoundaryCasesFile}: ${error.message}`];
+  }
+}
 
 const committedEvaluationFiles = {
   schema: "evaluations/run-metadata.schema.json",
@@ -88,7 +152,10 @@ export async function validateSkill(rootUrl) {
       missing.push(relativePath);
     }
   }
-  const invalid = await validateCommittedEvaluationArtifacts(root);
+  const invalid = [
+    ...(await validateCommittedEvaluationArtifacts(root)),
+    ...(await validateKbBoundaryCases(root))
+  ];
   return { missing, invalid };
 }
 

@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: validate (node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Package structure validation
+        run: node scripts/validate-skill.mjs
+
+      - name: Automated test suite
+        run: node --test tests/*.test.mjs
+
+      - name: Guard against private knowledge-base leakage
+        run: |
+          set -eu
+          if grep -rn -E "04-拆解师Ben|05-客户案例-脱敏|06-工具与工作流|MasterBenC/personal-kb|MasterBenC/miit-qualification-kb" README.md SKILL.md references/; then
+            echo "::error::private knowledge-base structure leaked into public docs (README.md / SKILL.md / references/)"
+            exit 1
+          fi
+          echo "No private knowledge-base references in public docs."

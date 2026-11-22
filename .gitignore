@@ -2,5 +2,6 @@
 .superpowers/
 node_modules/
 work/
+kb.local.md
 .DS_Store
 Thumbs.db
