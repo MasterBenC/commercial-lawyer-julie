@@ -49,9 +49,15 @@
 ### CI 与评测准备
 
 - 新增 `.github/workflows/ci.yml`：`push` 到 `main` 与 `pull_request` 时在 Node 20 / 22 矩阵运行 `node scripts/validate-skill.mjs` 与 `node --test tests/*.test.mjs`，并阻断私有知识库结构回流到公开文档。
-- 新增 `tests/kb-boundary.test.mjs`（17 项断言）锁定上述挂载探测、引用格式、断网降级、嵌套输出、注入防护、敏感标记、时效降级、提问节奏与 CI 配置；`scripts/validate-skill.mjs` 增加 `evaluations/v0.2-kb-boundary-regression-cases.json` 的机械校验（8 个用例、`status` 保持 `defined_not_run`、禁止出现分数或通过字段）。套件 53 → 70。
+- 新增 `tests/kb-boundary.test.mjs`（18 项断言）锁定上述挂载探测、引用格式、断网降级、嵌套输出、注入防护、敏感标记、时效降级、提问节奏与 CI 配置；`scripts/validate-skill.mjs` 增加 `evaluations/v0.2-kb-boundary-regression-cases.json` 的机械校验（8 个用例、`status` 保持 `defined_not_run`、禁止出现分数或通过字段）。套件 53 → 71。
 - 新增 `evaluations/v0.2-kb-boundary-regression-cases.md` / `.json`：定义 K01–K08 知识库与边界回归用例，**不含任何模型输出、跑分或结论**；README 同步说明“待执行”，v0.2 行为通过率仍为零证据。
 - 保留 `references/privacy-safety.md` 为必读安全基线；`intake-routing.md` 与 `output-contract.md` 暂不整篇中文化，避免破坏既有测试与 v0.1 基线可比性。
+
+### 复审补丁（2026-11-22）
+
+- `kb-mount.md` 与 `jurisdiction-source-policy.md` 明确 `kb（未经官方核验）` 不是第五种来源状态，而是 `kb` 的注明写法，避免宿主模型把它当作新枚举值自行扩展。
+- `.github/workflows/ci.yml` 的 `actions/checkout` 与 `actions/setup-node` 升级到 `v5`，消除 Node 20 运行时弃用告警。
+- 重新生成 `work/blind-evaluation/runtime-skill/`（21 文件），确保未提交的隔离运行时副本与本次修复后的正文一致，避免用旧副本做盲测。
 
 ## 0.1.0
 

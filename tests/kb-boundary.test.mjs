@@ -157,12 +157,25 @@ test("kb.local.md is git-ignored for local overrides", async () => {
   assert.match(gitignore, /^kb\.local\.md$/m);
 });
 
+test("degraded kb citations are a qualifier on kb, not a fifth source status", async () => {
+  const [kbMount, policy] = await Promise.all([
+    read("references/kb-mount.md"),
+    read("references/jurisdiction-source-policy.md")
+  ]);
+  for (const content of [kbMount, policy]) {
+    assert.match(content, /不是第五种状态/);
+    assert.match(content, /`kb` 的注明写法/);
+  }
+  assert.match(policy, /来源状态只有这四个值/);
+});
+
 test("CI runs the validator and the automated suite on pushes to main and pull requests", async () => {
   const workflow = await read(".github/workflows/ci.yml");
   assert.match(workflow, /branches:\s*\[\s*main\s*\]/);
   assert.match(workflow, /pull_request:/);
   assert.match(workflow, /node scripts\/validate-skill\.mjs/);
   assert.match(workflow, /node --test tests\/\*\.test\.mjs/);
+  assert.match(workflow, /actions\/checkout@v[45]/);
   assert.match(workflow, /04-拆解师Ben\|05-客户案例-脱敏/);
 });
 
